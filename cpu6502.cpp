@@ -4,28 +4,28 @@ cpu6502::cpu6502()
 {
     instructions =
     {
-		{ "BRK", &BRK, &IMM, 7 }, { "ORA", &ORA, &INX, 6 }, { "###", &XXX, &IMP, 2 }, { "###", &XXX, &IMP, 8 }, { "###", &NOP, &IMP, 3 }, { "ORA", &ORA, &ZPA, 3 }, { "ASL", &ASL, &ZPA, 5 }, { "###", &XXX, &IMP, 5 }, { "PHP", &PHP, &IMP, 3 }, { "ORA", &ORA, &IMM, 2 }, { "ASL", &ASL, &IMP, 2 }, { "###", &XXX, &IMP, 2 }, { "###", &NOP, &IMP, 4 }, { "ORA", &ORA, &ABS, 4 }, { "ASL", &ASL, &ABS, 6 }, { "###", &XXX, &IMP, 6 },
-		{ "BPL", &BPL, &REL, 2 }, { "ORA", &ORA, &INY, 5 }, { "###", &XXX, &IMP, 2 }, { "###", &XXX, &IMP, 8 }, { "###", &NOP, &IMP, 4 }, { "ORA", &ORA, &ZPX, 4 }, { "ASL", &ASL, &ZPX, 6 }, { "###", &XXX, &IMP, 6 }, { "CLC", &CLC, &IMP, 2 }, { "ORA", &ORA, &ABY, 4 }, { "###", &NOP, &IMP, 2 }, { "###", &XXX, &IMP, 7 }, { "###", &NOP, &IMP, 4 }, { "ORA", &ORA, &ABX, 4 }, { "ASL", &ASL, &ABX, 7 }, { "###", &XXX, &IMP, 7 },
-		{ "JSR", &JSR, &ABS, 6 }, { "AND", &AND, &INX, 6 }, { "###", &XXX, &IMP, 2 }, { "###", &XXX, &IMP, 8 }, { "BIT", &BIT, &ZPA, 3 }, { "AND", &AND, &ZPA, 3 }, { "ROL", &ROL, &ZPA, 5 }, { "###", &XXX, &IMP, 5 }, { "PLP", &PLP, &IMP, 4 }, { "AND", &AND, &IMM, 2 }, { "ROL", &ROL, &IMP, 2 }, { "###", &XXX, &IMP, 2 }, { "BIT", &BIT, &ABS, 4 }, { "AND", &AND, &ABS, 4 }, { "ROL", &ROL, &ABS, 6 }, { "###", &XXX, &IMP, 6 },
-		{ "BMI", &BMI, &REL, 2 }, { "AND", &AND, &INY, 5 }, { "###", &XXX, &IMP, 2 }, { "###", &XXX, &IMP, 8 }, { "###", &NOP, &IMP, 4 }, { "AND", &AND, &ZPX, 4 }, { "ROL", &ROL, &ZPX, 6 }, { "###", &XXX, &IMP, 6 }, { "SEC", &SEC, &IMP, 2 }, { "AND", &AND, &ABY, 4 }, { "###", &NOP, &IMP, 2 }, { "###", &XXX, &IMP, 7 }, { "###", &NOP, &IMP, 4 }, { "AND", &AND, &ABX, 4 }, { "ROL", &ROL, &ABX, 7 }, { "###", &XXX, &IMP, 7 },
-		{ "RTI", &RTI, &IMP, 6 }, { "EOR", &EOR, &INX, 6 }, { "###", &XXX, &IMP, 2 }, { "###", &XXX, &IMP, 8 }, { "###", &NOP, &IMP, 3 }, { "EOR", &EOR, &ZPA, 3 }, { "LSR", &LSR, &ZPA, 5 }, { "###", &XXX, &IMP, 5 }, { "PHA", &PHA, &IMP, 3 }, { "EOR", &EOR, &IMM, 2 }, { "LSR", &LSR, &IMP, 2 }, { "###", &XXX, &IMP, 2 }, { "JMP", &JMP, &ABS, 3 }, { "EOR", &EOR, &ABS, 4 }, { "LSR", &LSR, &ABS, 6 }, { "###", &XXX, &IMP, 6 },
-		{ "BVC", &BVC, &REL, 2 }, { "EOR", &EOR, &INY, 5 }, { "###", &XXX, &IMP, 2 }, { "###", &XXX, &IMP, 8 }, { "###", &NOP, &IMP, 4 }, { "EOR", &EOR, &ZPX, 4 }, { "LSR", &LSR, &ZPX, 6 }, { "###", &XXX, &IMP, 6 }, { "CLI", &CLI, &IMP, 2 }, { "EOR", &EOR, &ABY, 4 }, { "###", &NOP, &IMP, 2 }, { "###", &XXX, &IMP, 7 }, { "###", &NOP, &IMP, 4 }, { "EOR", &EOR, &ABX, 4 }, { "LSR", &LSR, &ABX, 7 }, { "###", &XXX, &IMP, 7 },
-		{ "RTS", &RTS, &IMP, 6 }, { "ADC", &ADC, &INX, 6 }, { "###", &XXX, &IMP, 2 }, { "###", &XXX, &IMP, 8 }, { "###", &NOP, &IMP, 3 }, { "ADC", &ADC, &ZPA, 3 }, { "ROR", &ROR, &ZPA, 5 }, { "###", &XXX, &IMP, 5 }, { "PLA", &PLA, &IMP, 4 }, { "ADC", &ADC, &IMM, 2 }, { "ROR", &ROR, &IMP, 2 }, { "###", &XXX, &IMP, 2 }, { "JMP", &JMP, &IND, 5 }, { "ADC", &ADC, &ABS, 4 }, { "ROR", &ROR, &ABS, 6 }, { "###", &XXX, &IMP, 6 },
-		{ "BVS", &BVS, &REL, 2 }, { "ADC", &ADC, &INY, 5 }, { "###", &XXX, &IMP, 2 }, { "###", &XXX, &IMP, 8 }, { "###", &NOP, &IMP, 4 }, { "ADC", &ADC, &ZPX, 4 }, { "ROR", &ROR, &ZPX, 6 }, { "###", &XXX, &IMP, 6 }, { "SEI", &SEI, &IMP, 2 }, { "ADC", &ADC, &ABY, 4 }, { "###", &NOP, &IMP, 2 }, { "###", &XXX, &IMP, 7 }, { "###", &NOP, &IMP, 4 }, { "ADC", &ADC, &ABX, 4 }, { "ROR", &ROR, &ABX, 7 }, { "###", &XXX, &IMP, 7 },
-		{ "###", &NOP, &IMP, 2 }, { "STA", &STA, &INX, 6 }, { "###", &NOP, &IMP, 2 }, { "###", &XXX, &IMP, 6 }, { "STY", &STY, &ZPA, 3 }, { "STA", &STA, &ZPA, 3 }, { "STX", &STX, &ZPA, 3 }, { "###", &XXX, &IMP, 3 }, { "DEY", &DEY, &IMP, 2 }, { "###", &NOP, &IMP, 2 }, { "TXA", &TXA, &IMP, 2 }, { "###", &XXX, &IMP, 2 }, { "STY", &STY, &ABS, 4 }, { "STA", &STA, &ABS, 4 }, { "STX", &STX, &ABS, 4 }, { "###", &XXX, &IMP, 4 },
-		{ "BCC", &BCC, &REL, 2 }, { "STA", &STA, &INY, 6 }, { "###", &XXX, &IMP, 2 }, { "###", &XXX, &IMP, 6 }, { "STY", &STY, &ZPX, 4 }, { "STA", &STA, &ZPX, 4 }, { "STX", &STX, &ZPY, 4 }, { "###", &XXX, &IMP, 4 }, { "TYA", &TYA, &IMP, 2 }, { "STA", &STA, &ABY, 5 }, { "TXS", &TXS, &IMP, 2 }, { "###", &XXX, &IMP, 5 }, { "###", &NOP, &IMP, 5 }, { "STA", &STA, &ABX, 5 }, { "###", &XXX, &IMP, 5 }, { "###", &XXX, &IMP, 5 },
-		{ "LDY", &LDY, &IMM, 2 }, { "LDA", &LDA, &INX, 6 }, { "LDX", &LDX, &IMM, 2 }, { "###", &XXX, &IMP, 6 }, { "LDY", &LDY, &ZPA, 3 }, { "LDA", &LDA, &ZPA, 3 }, { "LDX", &LDX, &ZPA, 3 }, { "###", &XXX, &IMP, 3 }, { "TAY", &TAY, &IMP, 2 }, { "LDA", &LDA, &IMM, 2 }, { "TAX", &TAX, &IMP, 2 }, { "###", &XXX, &IMP, 2 }, { "LDY", &LDY, &ABS, 4 }, { "LDA", &LDA, &ABS, 4 }, { "LDX", &LDX, &ABS, 4 }, { "###", &XXX, &IMP, 4 },
-		{ "BCS", &BCS, &REL, 2 }, { "LDA", &LDA, &INY, 5 }, { "###", &XXX, &IMP, 2 }, { "###", &XXX, &IMP, 5 }, { "LDY", &LDY, &ZPX, 4 }, { "LDA", &LDA, &ZPX, 4 }, { "LDX", &LDX, &ZPY, 4 }, { "###", &XXX, &IMP, 4 }, { "CLV", &CLV, &IMP, 2 }, { "LDA", &LDA, &ABY, 4 }, { "TSX", &TSX, &IMP, 2 }, { "###", &XXX, &IMP, 4 }, { "LDY", &LDY, &ABX, 4 }, { "LDA", &LDA, &ABX, 4 }, { "LDX", &LDX, &ABY, 4 }, { "###", &XXX, &IMP, 4 },
-		{ "CPY", &CPY, &IMM, 2 }, { "CMP", &CMP, &INX, 6 }, { "###", &NOP, &IMP, 2 }, { "###", &XXX, &IMP, 8 }, { "CPY", &CPY, &ZPA, 3 }, { "CMP", &CMP, &ZPA, 3 }, { "DEC", &DEC, &ZPA, 5 }, { "###", &XXX, &IMP, 5 }, { "INY", &INY, &IMP, 2 }, { "CMP", &CMP, &IMM, 2 }, { "DEX", &DEX, &IMP, 2 }, { "###", &XXX, &IMP, 2 }, { "CPY", &CPY, &ABS, 4 }, { "CMP", &CMP, &ABS, 4 }, { "DEC", &DEC, &ABS, 6 }, { "###", &XXX, &IMP, 6 },
-		{ "BNE", &BNE, &REL, 2 }, { "CMP", &CMP, &INY, 5 }, { "###", &XXX, &IMP, 2 }, { "###", &XXX, &IMP, 8 }, { "###", &NOP, &IMP, 4 }, { "CMP", &CMP, &ZPX, 4 }, { "DEC", &DEC, &ZPX, 6 }, { "###", &XXX, &IMP, 6 }, { "CLD", &CLD, &IMP, 2 }, { "CMP", &CMP, &ABY, 4 }, { "NOP", &NOP, &IMP, 2 }, { "###", &XXX, &IMP, 7 }, { "###", &NOP, &IMP, 4 }, { "CMP", &CMP, &ABX, 4 }, { "DEC", &DEC, &ABX, 7 }, { "###", &XXX, &IMP, 7 },
-		{ "CPX", &CPX, &IMM, 2 }, { "SBC", &SBC, &INX, 6 }, { "###", &NOP, &IMP, 2 }, { "###", &XXX, &IMP, 8 }, { "CPX", &CPX, &ZPA, 3 }, { "SBC", &SBC, &ZPA, 3 }, { "INC", &INC, &ZPA, 5 }, { "###", &XXX, &IMP, 5 }, { "INX", &INX, &IMP, 2 }, { "SBC", &SBC, &IMM, 2 }, { "NOP", &NOP, &IMP, 2 }, { "###", &SBC, &IMP, 2 }, { "CPX", &CPX, &ABS, 4 }, { "SBC", &SBC, &ABS, 4 }, { "INC", &INC, &ABS, 6 }, { "###", &XXX, &IMP, 6 },
-		{ "BEQ", &BEQ, &REL, 2 }, { "SBC", &SBC, &INY, 5 }, { "###", &XXX, &IMP, 2 }, { "###", &XXX, &IMP, 8 }, { "###", &NOP, &IMP, 4 }, { "SBC", &SBC, &ZPX, 4 }, { "INC", &INC, &ZPX, 6 }, { "###", &XXX, &IMP, 6 }, { "SED", &SED, &IMP, 2 }, { "SBC", &SBC, &ABY, 4 }, { "NOP", &NOP, &IMP, 2 }, { "###", &XXX, &IMP, 7 }, { "###", &NOP, &IMP, 4 }, { "SBC", &SBC, &ABX, 4 }, { "INC", &INC, &ABX, 7 }, { "###", &XXX, &IMP, 7 },
-    };																																																																																	  
+		{ "BRK", &BRK, &IMM, 7 }, { "ORA", &ORA, &IZX, 6 }, { "###", &XXX, &IMP, 2 }, { "###", &XXX, &IMP, 8 }, { "###", &NOP, &IMP, 3 }, { "ORA", &ORA, &ZPA, 3 }, { "ASL", &ASL, &ZPA, 5 }, { "###", &XXX, &IMP, 5 }, { "PHP", &PHP, &IMP, 3 }, { "ORA", &ORA, &IMM, 2 }, { "ASL", &ASL, &IMP, 2 }, { "###", &XXX, &IMP, 2 }, { "###", &NOP, &IMP, 4 }, { "ORA", &ORA, &ABS, 4 }, { "ASL", &ASL, &ABS, 6 }, { "###", &XXX, &IMP, 6 },
+		{ "BPL", &BPL, &REL, 2 }, { "ORA", &ORA, &IZY, 5 }, { "###", &XXX, &IMP, 2 }, { "###", &XXX, &IMP, 8 }, { "###", &NOP, &IMP, 4 }, { "ORA", &ORA, &ZPX, 4 }, { "ASL", &ASL, &ZPX, 6 }, { "###", &XXX, &IMP, 6 }, { "CLC", &CLC, &IMP, 2 }, { "ORA", &ORA, &ABY, 4 }, { "###", &NOP, &IMP, 2 }, { "###", &XXX, &IMP, 7 }, { "###", &NOP, &IMP, 4 }, { "ORA", &ORA, &ABX, 4 }, { "ASL", &ASL, &ABX, 7 }, { "###", &XXX, &IMP, 7 },
+		{ "JSR", &JSR, &ABS, 6 }, { "AND", &AND, &IZX, 6 }, { "###", &XXX, &IMP, 2 }, { "###", &XXX, &IMP, 8 }, { "BIT", &BIT, &ZPA, 3 }, { "AND", &AND, &ZPA, 3 }, { "ROL", &ROL, &ZPA, 5 }, { "###", &XXX, &IMP, 5 }, { "PLP", &PLP, &IMP, 4 }, { "AND", &AND, &IMM, 2 }, { "ROL", &ROL, &IMP, 2 }, { "###", &XXX, &IMP, 2 }, { "BIT", &BIT, &ABS, 4 }, { "AND", &AND, &ABS, 4 }, { "ROL", &ROL, &ABS, 6 }, { "###", &XXX, &IMP, 6 },
+		{ "BMI", &BMI, &REL, 2 }, { "AND", &AND, &IZY, 5 }, { "###", &XXX, &IMP, 2 }, { "###", &XXX, &IMP, 8 }, { "###", &NOP, &IMP, 4 }, { "AND", &AND, &ZPX, 4 }, { "ROL", &ROL, &ZPX, 6 }, { "###", &XXX, &IMP, 6 }, { "SEC", &SEC, &IMP, 2 }, { "AND", &AND, &ABY, 4 }, { "###", &NOP, &IMP, 2 }, { "###", &XXX, &IMP, 7 }, { "###", &NOP, &IMP, 4 }, { "AND", &AND, &ABX, 4 }, { "ROL", &ROL, &ABX, 7 }, { "###", &XXX, &IMP, 7 },
+		{ "RTI", &RTI, &IMP, 6 }, { "EOR", &EOR, &IZX, 6 }, { "###", &XXX, &IMP, 2 }, { "###", &XXX, &IMP, 8 }, { "###", &NOP, &IMP, 3 }, { "EOR", &EOR, &ZPA, 3 }, { "LSR", &LSR, &ZPA, 5 }, { "###", &XXX, &IMP, 5 }, { "PHA", &PHA, &IMP, 3 }, { "EOR", &EOR, &IMM, 2 }, { "LSR", &LSR, &IMP, 2 }, { "###", &XXX, &IMP, 2 }, { "JMP", &JMP, &ABS, 3 }, { "EOR", &EOR, &ABS, 4 }, { "LSR", &LSR, &ABS, 6 }, { "###", &XXX, &IMP, 6 },
+		{ "BVC", &BVC, &REL, 2 }, { "EOR", &EOR, &IZY, 5 }, { "###", &XXX, &IMP, 2 }, { "###", &XXX, &IMP, 8 }, { "###", &NOP, &IMP, 4 }, { "EOR", &EOR, &ZPX, 4 }, { "LSR", &LSR, &ZPX, 6 }, { "###", &XXX, &IMP, 6 }, { "CLI", &CLI, &IMP, 2 }, { "EOR", &EOR, &ABY, 4 }, { "###", &NOP, &IMP, 2 }, { "###", &XXX, &IMP, 7 }, { "###", &NOP, &IMP, 4 }, { "EOR", &EOR, &ABX, 4 }, { "LSR", &LSR, &ABX, 7 }, { "###", &XXX, &IMP, 7 },
+		{ "RTS", &RTS, &IMP, 6 }, { "ADC", &ADC, &IZX, 6 }, { "###", &XXX, &IMP, 2 }, { "###", &XXX, &IMP, 8 }, { "###", &NOP, &IMP, 3 }, { "ADC", &ADC, &ZPA, 3 }, { "ROR", &ROR, &ZPA, 5 }, { "###", &XXX, &IMP, 5 }, { "PLA", &PLA, &IMP, 4 }, { "ADC", &ADC, &IMM, 2 }, { "ROR", &ROR, &IMP, 2 }, { "###", &XXX, &IMP, 2 }, { "JMP", &JMP, &IND, 5 }, { "ADC", &ADC, &ABS, 4 }, { "ROR", &ROR, &ABS, 6 }, { "###", &XXX, &IMP, 6 },
+		{ "BVS", &BVS, &REL, 2 }, { "ADC", &ADC, &IZY, 5 }, { "###", &XXX, &IMP, 2 }, { "###", &XXX, &IMP, 8 }, { "###", &NOP, &IMP, 4 }, { "ADC", &ADC, &ZPX, 4 }, { "ROR", &ROR, &ZPX, 6 }, { "###", &XXX, &IMP, 6 }, { "SEI", &SEI, &IMP, 2 }, { "ADC", &ADC, &ABY, 4 }, { "###", &NOP, &IMP, 2 }, { "###", &XXX, &IMP, 7 }, { "###", &NOP, &IMP, 4 }, { "ADC", &ADC, &ABX, 4 }, { "ROR", &ROR, &ABX, 7 }, { "###", &XXX, &IMP, 7 },
+		{ "###", &NOP, &IMP, 2 }, { "STA", &STA, &IZX, 6 }, { "###", &NOP, &IMP, 2 }, { "###", &XXX, &IMP, 6 }, { "STY", &STY, &ZPA, 3 }, { "STA", &STA, &ZPA, 3 }, { "STX", &STX, &ZPA, 3 }, { "###", &XXX, &IMP, 3 }, { "DEY", &DEY, &IMP, 2 }, { "###", &NOP, &IMP, 2 }, { "TXA", &TXA, &IMP, 2 }, { "###", &XXX, &IMP, 2 }, { "STY", &STY, &ABS, 4 }, { "STA", &STA, &ABS, 4 }, { "STX", &STX, &ABS, 4 }, { "###", &XXX, &IMP, 4 },
+		{ "BCC", &BCC, &REL, 2 }, { "STA", &STA, &IZY, 6 }, { "###", &XXX, &IMP, 2 }, { "###", &XXX, &IMP, 6 }, { "STY", &STY, &ZPX, 4 }, { "STA", &STA, &ZPX, 4 }, { "STX", &STX, &ZPY, 4 }, { "###", &XXX, &IMP, 4 }, { "TYA", &TYA, &IMP, 2 }, { "STA", &STA, &ABY, 5 }, { "TXS", &TXS, &IMP, 2 }, { "###", &XXX, &IMP, 5 }, { "###", &NOP, &IMP, 5 }, { "STA", &STA, &ABX, 5 }, { "###", &XXX, &IMP, 5 }, { "###", &XXX, &IMP, 5 },
+		{ "LDY", &LDY, &IMM, 2 }, { "LDA", &LDA, &IZX, 6 }, { "LDX", &LDX, &IMM, 2 }, { "###", &XXX, &IMP, 6 }, { "LDY", &LDY, &ZPA, 3 }, { "LDA", &LDA, &ZPA, 3 }, { "LDX", &LDX, &ZPA, 3 }, { "###", &XXX, &IMP, 3 }, { "TAY", &TAY, &IMP, 2 }, { "LDA", &LDA, &IMM, 2 }, { "TAX", &TAX, &IMP, 2 }, { "###", &XXX, &IMP, 2 }, { "LDY", &LDY, &ABS, 4 }, { "LDA", &LDA, &ABS, 4 }, { "LDX", &LDX, &ABS, 4 }, { "###", &XXX, &IMP, 4 },
+		{ "BCS", &BCS, &REL, 2 }, { "LDA", &LDA, &IZY, 5 }, { "###", &XXX, &IMP, 2 }, { "###", &XXX, &IMP, 5 }, { "LDY", &LDY, &ZPX, 4 }, { "LDA", &LDA, &ZPX, 4 }, { "LDX", &LDX, &ZPY, 4 }, { "###", &XXX, &IMP, 4 }, { "CLV", &CLV, &IMP, 2 }, { "LDA", &LDA, &ABY, 4 }, { "TSX", &TSX, &IMP, 2 }, { "###", &XXX, &IMP, 4 }, { "LDY", &LDY, &ABX, 4 }, { "LDA", &LDA, &ABX, 4 }, { "LDX", &LDX, &ABY, 4 }, { "###", &XXX, &IMP, 4 },
+		{ "CPY", &CPY, &IMM, 2 }, { "CMP", &CMP, &IZX, 6 }, { "###", &NOP, &IMP, 2 }, { "###", &XXX, &IMP, 8 }, { "CPY", &CPY, &ZPA, 3 }, { "CMP", &CMP, &ZPA, 3 }, { "DEC", &DEC, &ZPA, 5 }, { "###", &XXX, &IMP, 5 }, { "IZY", &IZY, &IMP, 2 }, { "CMP", &CMP, &IMM, 2 }, { "DEX", &DEX, &IMP, 2 }, { "###", &XXX, &IMP, 2 }, { "CPY", &CPY, &ABS, 4 }, { "CMP", &CMP, &ABS, 4 }, { "DEC", &DEC, &ABS, 6 }, { "###", &XXX, &IMP, 6 },
+		{ "BNE", &BNE, &REL, 2 }, { "CMP", &CMP, &IZY, 5 }, { "###", &XXX, &IMP, 2 }, { "###", &XXX, &IMP, 8 }, { "###", &NOP, &IMP, 4 }, { "CMP", &CMP, &ZPX, 4 }, { "DEC", &DEC, &ZPX, 6 }, { "###", &XXX, &IMP, 6 }, { "CLD", &CLD, &IMP, 2 }, { "CMP", &CMP, &ABY, 4 }, { "NOP", &NOP, &IMP, 2 }, { "###", &XXX, &IMP, 7 }, { "###", &NOP, &IMP, 4 }, { "CMP", &CMP, &ABX, 4 }, { "DEC", &DEC, &ABX, 7 }, { "###", &XXX, &IMP, 7 },
+		{ "CPX", &CPX, &IMM, 2 }, { "SBC", &SBC, &IZX, 6 }, { "###", &NOP, &IMP, 2 }, { "###", &XXX, &IMP, 8 }, { "CPX", &CPX, &ZPA, 3 }, { "SBC", &SBC, &ZPA, 3 }, { "INC", &INC, &ZPA, 5 }, { "###", &XXX, &IMP, 5 }, { "IZX", &IZX, &IMP, 2 }, { "SBC", &SBC, &IMM, 2 }, { "NOP", &NOP, &IMP, 2 }, { "###", &SBC, &IMP, 2 }, { "CPX", &CPX, &ABS, 4 }, { "SBC", &SBC, &ABS, 4 }, { "INC", &INC, &ABS, 6 }, { "###", &XXX, &IMP, 6 },
+		{ "BEQ", &BEQ, &REL, 2 }, { "SBC", &SBC, &IZY, 5 }, { "###", &XXX, &IMP, 2 }, { "###", &XXX, &IMP, 8 }, { "###", &NOP, &IMP, 4 }, { "SBC", &SBC, &ZPX, 4 }, { "INC", &INC, &ZPX, 6 }, { "###", &XXX, &IMP, 6 }, { "SED", &SED, &IMP, 2 }, { "SBC", &SBC, &ABY, 4 }, { "NOP", &NOP, &IMP, 2 }, { "###", &XXX, &IMP, 7 }, { "###", &NOP, &IMP, 4 }, { "SBC", &SBC, &ABX, 4 }, { "INC", &INC, &ABX, 7 }, { "###", &XXX, &IMP, 7 },
+    };
 }
 
 void cpu6502::reset()
 {
-	stack_ptr = 0x100;
+	stack_ptr = 0;
 	program_counter = 0;
 }
 
@@ -77,6 +77,12 @@ uint8_t cpu6502::read(uint16_t addr)
 	return bus->read(addr);
 }
 
+void cpu6502::push_stack(uint8_t value)
+{
+	write(0x100 + (uint16_t)stack_ptr, value);
+	stack_ptr--;
+}
+
 void cpu6502::memorize()
 {
 	// We want to memorize data for every addressing mode
@@ -85,16 +91,6 @@ void cpu6502::memorize()
 
 	if (instructions[opcode].addr_mode != &IMP)
 		memory = read(abs_addr);
-}
-
-/* Accumulator AM
-| Simply saves a value from
-| an accumulator into a memory
-*/
-bool cpu6502::ACC()
-{
-	memory = accumulator;
-	return false;
 }
 
 /* Immediate AM
@@ -261,7 +257,7 @@ bool cpu6502::REL()
 | Takes a value from the RAM and uses it as a pointer to the data,
 | also offsets the pointer by the X register
 */
-bool cpu6502::INX()
+bool cpu6502::IZX()
 {
 	uint16_t ptr = read(program_counter++);
 
@@ -276,7 +272,7 @@ bool cpu6502::INX()
 | also offsets not the pointer but the final address itself by the Y register.
 | Notice that here we also check for a page crossing.
 */
-bool cpu6502::INY()
+bool cpu6502::IZY()
 {
 	uint16_t ptr = read(program_counter++);
 
@@ -408,9 +404,7 @@ bool cpu6502::AND()
 	accumulator &= memory;
 	
 	set_flag(flag_z, accumulator == 0);
-
-	// The value is negative if the leftmost bit is set to 1
-	set_flag(flag_n, accumulator & 0b10000000);
+	set_flag(flag_n, accumulator & 0b10000000); // 7th bit
 
 	// requires additional clock cycle
 	return true;
@@ -509,8 +503,21 @@ bool cpu6502::BEQ()
 	return false;
 }
 
+/* Bit Test
+| This instruction doesn't change the memory or the registers,
+| it changes Z, V and N flags
+*/
 bool cpu6502::BIT()
 {
+	memorize();
+
+	// Storing the result of BAND into the accumulator
+	accumulator &= memory;
+
+	set_flag(flag_z, accumulator == 0);
+	set_flag(flag_v, memory & 0b01000000); // 6th bit
+	set_flag(flag_n, memory & 0b10000000); // 7th bit
+
 	return false;
 }
 
@@ -610,98 +617,272 @@ bool cpu6502::CLV()
 	return false;
 }
 
+/* CoMPare A
+| Simply compares values of the accumulator and of the memory
+| by performing A - M and then it modifies carry, zero and negative flags,
+| notice that it does not change a value of anything
+*/
 bool cpu6502::CMP()
 {
-	return false;
+	memorize();
+	uint16_t res = (uint16_t)accumulator - (uint16_t)memory;
+
+	set_flag(flag_c, accumulator >= memory);
+	set_flag(flag_z, accumulator == memory);
+	set_flag(flag_n, res & 0b10000000);
+
+	return true;
 }
 
+/* CoMPare X
+| The same as CMP but here we use X register instead of the accumulator
+*/
 bool cpu6502::CPX()
 {
-	return false;
+	memorize();
+	uint16_t res = (uint16_t)x - (uint16_t)memory;
+
+	set_flag(flag_c, x >= memory);
+	set_flag(flag_z, x == memory);
+	set_flag(flag_n, res & 0b10000000);
+
+	return true;
 }
 
+/* CoMPare Y
+| The same as CMP but here we use Y register instead of the accumulator
+*/
 bool cpu6502::CPY()
 {
-	return false;
+	memorize();
+
+	set_flag(flag_c, y >= memory);
+	set_flag(flag_z, y == memory);
+	set_flag(flag_n, ((uint16_t)y - (uint16_t)memory) & 0b10000000);
+
+	return true;
 }
 
+/* DECrement memory
+| Performs M = M - 1 and there is no equivalent for the accumulator,
+| only affects Z and N flags
+*/
 bool cpu6502::DEC()
 {
+	memorize();
+
+	uint8_t res = memory - 1;
+	write(abs_addr, res);
+
+	set_flag(flag_z, res == 0);
+	set_flag(flag_n, res & 0b10000000);
+
 	return false;
 }
 
+/* DEcrement X
+| Decrements a value of the X register and sets Z and N flags
+*/
 bool cpu6502::DEX()
 {
+	x--;
+
+	set_flag(flag_z, x == 0);
+	set_flag(flag_n, x & 0b10000000);
+
 	return false;
 }
 
+/* DEcrement Y
+| Decrements a value of the Y register and sets Z and N flags
+*/
 bool cpu6502::DEY()
 {
+	y--;
+
+	set_flag(flag_z, y == 0);
+	set_flag(flag_n, y & 0b10000000);
+
 	return false;
 }
 
+/* Exclusive OR
+| Performs A = A ^ M and modifies the Z and N flags
+*/
 bool cpu6502::EOR()
 {
-	return false;
+	memorize();
+	accumulator ^= memory;
+
+	set_flag(flag_z, accumulator == 0);
+	set_flag(flag_n, accumulator & 0b10000000);
+
+	return true;
 }
 
+/* INCrement memory
+| Performs M = M + 1 and notice there is no alternative for the accumulator,
+| also modifies Z and N flags
+*/
 bool cpu6502::INC()
 {
+	memorize();
+
+	uint8_t res = memory + 1;
+	write(abs_addr, res);
+
+	set_flag(flag_z, res == 0);
+	set_flag(flag_n, res & 0b10000000);
+
 	return false;
 }
 
 bool cpu6502::XXX()
 {
+	// Nothing to do
 	return false;
 }
 
+/* JuMP
+| Jumping to the specified address
+*/
 bool cpu6502::JMP()
 {
+	// We have precalculated the address in the addressing mode
+	program_counter = abs_addr; 
 	return false;
 }
 
+/* Jump to SubRoutine
+| Pushes the pointer to the previous instruction to the stack and
+| jumps to the new address
+*/
 bool cpu6502::JSR()
 {
+	// We decrement it because the return address on the stack
+	// points 1 byte before the start of the next instruction
+	program_counter--;
+
+	push_stack((program_counter << 8) & 0x00FF);
+	push_stack(program_counter & 0x00FF);
+
+	program_counter = abs_addr;
+
 	return false;
 }
 
+/* LoaD A
+| Loads the memory content into the accumulator,
+| sets zero and negative flags
+*/
 bool cpu6502::LDA()
 {
-	return false;
+	memorize();
+	accumulator = memory;
+
+	set_flag(flag_z, accumulator == 0);
+	set_flag(flag_n, accumulator & 0b10000000);
+
+	return true;
 }
 
+/* LoaD X
+| Loads the memory content into the X register,
+| sets zero and negative flags
+*/
 bool cpu6502::LDX()
 {
-	return false;
+	memorize();
+	x = memory;
+
+	set_flag(flag_z, x == 0);
+	set_flag(flag_n, x & 0b10000000);
+
+	return true;
 }
 
+/* LoaD Y
+| Loads the memory content into the Y register,
+| sets zero and negative flags
+*/
 bool cpu6502::LDY()
 {
-	return false;
+	memorize();
+	y = memory;
+
+	set_flag(flag_z, y == 0);
+	set_flag(flag_n, y & 0b10000000);
+
+	return true;
 }
 
+/* Logical Shift Right
+| Behaves the same way as the ASL but here we perform
+| M >> 1 rather than M << 1 and sets a carry flag with
+| the first bit of the memory value
+*/
 bool cpu6502::LSR()
 {
+	memorize();
+	uint16_t res_ext = (uint16_t)memory >> 1;
+
+	set_flag(flag_c, memory & 1);
+	set_flag(flag_n, 0);
+
+	uint8_t res = res_ext & 0x00FF;
+
+	// Only applies to the accumulator
+	set_flag(flag_z, res == 0);
+
+	// We write to the accumulator if the addressing mode is implied
+	// otherwise we write to the memory
+
+	if (instructions[opcode].addr_mode == &IMP)
+		accumulator = res;
+	else
+		write(abs_addr, res);
+
 	return false;
 }
 
+/* No OPeration
+| Does nothing and requires no additional
+| clock cycles, does it?
+*/
 bool cpu6502::NOP()
 {
 	return false;
 }
 
+/* Bitwise OR
+| Performs A = A | M and modifies the Z and N flags
+*/
 bool cpu6502::ORA()
 {
-	return false;
+	memorize();
+	accumulator |= memory;
+
+	set_flag(flag_z, accumulator == 0);
+	set_flag(flag_n, accumulator & 0b10000000);
+
+	return true;
 }
 
+/* PusH Accumulator
+| Pushes the value of the accumulator to the stack
+*/
 bool cpu6502::PHA()
 {
+	push_stack(accumulator);
 	return false;
 }
 
+/* PusH Processor status
+| Pushes processor status to the stack
+*/
 bool cpu6502::PHP()
 {
+	push_stack(status | flag_b | flag_1);
 	return false;
 }
 
@@ -837,3 +1018,30 @@ bool cpu6502::TYA()
 {
 	return false;
 }
+
+/* INcrement X
+| Performs X = X + 1 and sets Z and N flags
+*/
+bool cpu6502::INX()
+{
+	x++;
+
+	set_flag(flag_z, x == 0);
+	set_flag(flag_n, x & 0b10000000);
+
+	return false;
+}
+
+/* INcrement Y
+| Performs Y = Y + 1 and sets Z and N flags
+*/
+bool cpu6502::INY()
+{
+	y++;
+
+	set_flag(flag_z, y == 0);
+	set_flag(flag_n, y & 0b10000000);
+
+	return false;
+}
+
