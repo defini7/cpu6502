@@ -20,6 +20,8 @@ public:
     void write(uint16_t addr, uint8_t value);
     uint8_t read(uint16_t addr);
 
+    void memorize();
+
 protected:
     // Stores a number of clock cycles to execute
     uint8_t cycles = 0;
@@ -36,6 +38,9 @@ protected:
 
     union
     {
+        // Here is the address that we want to read from
+        // during the opcode execution process,
+        // this variable is modified by the addressing modes
         uint16_t abs_addr = 0;
 
         struct
@@ -44,6 +49,11 @@ protected:
             uint8_t abs_addr_1;
         };
     };
+
+    // In 6502 CPU we have branch instructions that allow us to
+    // jump a certain distance from the current location, for this
+    // kind of situations we will use relative address
+    uint16_t rel_addr = 0;
 
     /* 1) Registers: https://www.nesdev.org/wiki/CPU_registers */
 
@@ -96,6 +106,7 @@ protected:
     };
 
     void set_flag(uint8_t flag, bool enable);
+    bool get_flag(uint8_t flag) const;
 
     /* 3) Opcodes and addressing modes: https://www.nesdev.org/wiki/Instruction_reference */
 
@@ -106,6 +117,8 @@ protected:
     bool CLD();	bool CLI();	bool CLV();	bool CMP();	bool CPX();	bool CPY();	bool DEC();	bool DEX();	bool DEY();	bool EOR();	bool INC();	bool INX();	bool INY();	bool JMP();
     bool JSR();	bool LDA();	bool LDX();	bool LDY();	bool LSR();	bool NOP();	bool ORA();	bool PHA();	bool PHP();	bool PLA();	bool PLP();	bool ROL();	bool ROR();	bool RTI();
     bool RTS();	bool SBC();	bool SEC();	bool SED();	bool SEI();	bool STA();	bool STX();	bool STY();	bool TAX();	bool TAY();	bool TSX();	bool TXA();	bool TXS();	bool TYA();
+
+    void cond_branch_base(uint8_t flag, bool value);
 
     // Addressing modes: https://www.zophar.net/fileuploads/2/10532krzvs/6502.txt
     bool ACC(); bool IMM(); bool ABS();
@@ -127,5 +140,10 @@ protected:
     };
 
     std::vector<Instruction> instructions;
+
+    /* 4) Interrupts: https://www.nesdev.org/wiki/CPU_interrupts */
+    
+    void IRQ();
+    void NMI();
 
 };

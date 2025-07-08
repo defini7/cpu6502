@@ -26,6 +26,7 @@ cpu6502::cpu6502()
 void cpu6502::reset()
 {
 	stack_ptr = 0x100;
+	program_counter = 0;
 }
 
 void cpu6502::clock()
@@ -74,6 +75,16 @@ void cpu6502::write(uint16_t addr, uint8_t value)
 uint8_t cpu6502::read(uint16_t addr)
 {
 	return bus->read(addr);
+}
+
+void cpu6502::memorize()
+{
+	// We want to memorize data for every addressing mode
+	// except the IMPlied one because there is nothing
+	// to memorize
+
+	if (instructions[opcode].addr_mode != &IMP)
+		memory = read(abs_addr);
 }
 
 /* Accumulator AM
@@ -207,10 +218,10 @@ bool cpu6502::ABY()
 	abs_addr_1 = read(program_counter++);
 	abs_addr_0 = read(program_counter++);
 
-	uint8_t old_left = abs_addr_0;
+	uint8_t old_page = abs_addr_0;
 	abs_addr += y;
 
-	if (abs_addr_0 != old_left)
+	if (abs_addr_0 != old_page)
 		return true;
 
 	return false;
@@ -226,18 +237,61 @@ bool cpu6502::IMP()
 	return false;
 }
 
+/* Relative AM
+| Only applied to the branching instructions (e.g. JMP), so it must
+| set relative address to jump from the current location in the program
+| to another
+*/
 bool cpu6502::REL()
 {
+	rel_addr = read(program_counter++);
+
+	if (rel_addr & 0b10000000)
+	{
+		// If the first bit is set to 1 then we have an unsigned type
+		// but we need to treat it like a signed type because
+		// we want to be able to jump backwards
+		rel_addr |= 0xFF00;
+	}
+
 	return false;
 }
 
+/* Indirect Zero Page AM with the X register
+| Takes a value from the RAM and uses it as a pointer to the data,
+| also offsets the pointer by the X register
+*/
 bool cpu6502::INX()
 {
+	uint16_t ptr = read(program_counter++);
+
+	abs_addr_1 = read((ptr + x + 0) & 0x00FF);
+	abs_addr_0 = read((ptr + x + 1) & 0x00FF);
+
 	return false;
 }
 
+/* Indirect Zero Page AM with the Y register
+| Takes a value from the RAM and uses it as a pointer to the data,
+| also offsets not the pointer but the final address itself by the Y register.
+| Notice that here we also check for a page crossing.
+*/
 bool cpu6502::INY()
 {
+	uint16_t ptr = read(program_counter++);
+
+	abs_addr_1 = read((ptr + 0) & 0x00FF);
+	abs_addr_0 = read((ptr + 1) & 0x00FF);
+
+	uint8_t old_page = abs_addr_0;
+	abs_addr += y;
+
+	if (abs_addr_0 != old_page)
+	{
+		// The page crossing has occured
+		return true;
+	}
+
 	return false;
 }
 
@@ -254,9 +308,23 @@ bool cpu6502::IND()
 	// Construct the pointer
 	uint16_t ptr = (ptr_left << 8) | ptr_right;
 
-	// Get the data we want
-	abs_addr_0 = read(ptr + 1);
-	abs_addr_1 = read(ptr + 0);
+	// One crucial moment: if the ptr occurs to be $FF then
+	// we read the high byte of the abs_addr at ($FF + $1)
+	// so we cross the current page but there is a hardware
+	// bug in the 6502 CPU that doesn't allow us to move to
+	// the next page if there is a page crossing
+	// (i.e. ptr_right is $FF)
+
+	// All found bugs: https://www.nesdev.org/6502bugs.txt
+
+	abs_addr_1 = read(ptr);
+
+	// Simulating the "correct" behaviour
+
+	if (ptr_right == 0x00FF) // ignore page crossing
+		abs_addr_0 = read(ptr & 0xFF00);
+	else
+		abs_addr_0 = read(ptr + 1);
 
 	return false;
 }
@@ -285,9 +353,49 @@ void cpu6502::set_flag(uint8_t flag, bool enable)
 	}
 }
 
+bool cpu6502::get_flag(uint8_t flag) const
+{
+	return (status & flag) != 0;
+}
+
+/* ADd with a Carry
+| Simly performs addition. However, it is not as easy as it sounds:
+| you need to keep in mind that you can work with signed and unsigned numbers
+| and of course they have their own numeric borders, so this operation
+| changes negative (n), overflow (v) flags and zero (z) flags
+*/
 bool cpu6502::ADC()
 {
-	return false;
+	/* Situations when overflow is occured:
+	* positive + positive = negative
+	* negative + negative = positive */
+
+	// There is a formula that handles that:
+	// v = (accumulator ^ result) & ~(accumulator ^ memory)
+
+	memorize();
+
+	uint16_t res = (uint16_t)memory + (uint16_t)accumulator;
+	if (get_flag(flag_c)) res++;
+
+	// Overflow
+	bool v = ((uint16_t)accumulator ^ res) & ~((uint16_t)accumulator ^ memory);
+	set_flag(flag_v, v & 0b10000000);
+
+	// Store the result (taking last 1 byte because the result is actually 1 byte in size)
+	accumulator = res & 0x00FF;
+
+	// Check for a 0 result
+	set_flag(flag_z, accumulator == 0);
+
+	// Set if there is something to carry because if there is
+	// we will accumulate it on the next call of the ADC instruction
+	set_flag(flag_c, res > 255);
+
+	// If the first bit is set to 1 then we've got a negative number
+	set_flag(flag_n, res & 0b10000000);
+
+	return true;
 }
 
 /* Binary AND
@@ -296,6 +404,7 @@ bool cpu6502::ADC()
 */
 bool cpu6502::AND()
 {
+	memorize();
 	accumulator &= memory;
 	
 	set_flag(flag_z, accumulator == 0);
@@ -307,26 +416,96 @@ bool cpu6502::AND()
 	return true;
 }
 
-/* Arithmetic shift left
-* Performs 
+/* Arithmetic Shift Left
+| Performs M << 1 and changes carry (c), zero (z) and negative (n) flags
+| and stores the result into accumulator or memory
 */
 bool cpu6502::ASL()
 {
-	
+	memorize();
+	uint16_t res_ext = (uint16_t)memory << 1;
+
+	set_flag(flag_c, memory & 0b10000000);
+	set_flag(flag_n, res_ext & 0b10000000);
+
+	uint8_t res = res_ext & 0x00FF;
+
+	// Only applies to the accumulator
+	set_flag(flag_z, res == 0);
+
+	// We write to the accumulator if the addressing mode is implied
+	// otherwise we write to the memory
+
+	if (instructions[opcode].addr_mode == &IMP)
+		accumulator = res;
+	else
+		write(abs_addr, res);
+
+	return false;
 }
 
+/* Everything you need to know to implement branch instructions
+*  (notice that all of them are the same, the only thing
+*   that changes is the flag checker):
+*  use this https://www.nesdev.org/wiki/Instruction_reference and
+*  https://www.nesdev.org/obelisk-6502-guide/reference.html
+*  because some instructions' descriptions are not clear on the first link
+*  and better described on the second link, however some of the instructions
+*  are corrupted on the second link (e.g. ASL flags' description)
+*/
+
+/* Conditional Branching Base
+| Simply hides all repetitive code for every branching instruction
+*/
+void cpu6502::cond_branch_base(uint8_t flag, bool value)
+{
+	if (get_flag(flag) == value)
+	{
+		// We always add one clock cycle
+		cycles++;
+
+		// Calculate a new location
+		abs_addr = program_counter + rel_addr;
+
+		// Check for a page boundary crossing
+		if (abs_addr_0 != (program_counter & 0xFF00))
+			cycles++;
+
+		// Move to the new location
+		program_counter = abs_addr;
+	}
+}
+
+/* Branch if Carry Clear
+| If the carry flag is set to 0 then we jump
+| by an offset (rel_addr) and it requires 1 additional cycle
+| if we don't cross the page boundary and requires 2 if we cross it
+*/
 bool cpu6502::BCC()
 {
+	cond_branch_base(flag_c, false);
 	return false;
 }
 
+/* Branch if Carry Set
+| If the carry flag is set to 1 then we jump
+| by an offset (rel_addr) and it requires 1 additional cycle
+| if we don't cross the page boundary and requires 2 if we cross it
+*/
 bool cpu6502::BCS()
 {
+	cond_branch_base(flag_c, true);
 	return false;
 }
 
+/* Branch if Equal
+| If the zero flag is set to 1 then we jump
+| by an offset (rel_addr) and it requires 1 additional cycle
+| if we don't cross the page boundary and requires 2 if we cross it
+*/
 bool cpu6502::BEQ()
 {
+	cond_branch_base(flag_z, true);
 	return false;
 }
 
@@ -335,18 +514,36 @@ bool cpu6502::BIT()
 	return false;
 }
 
+/* Branch if Minus
+| If the negative flag is set to 1 then we jump
+| by an offset (rel_addr) and it requires 1 additional cycle
+| if we don't cross the page boundary and requires 2 if we cross it
+*/
 bool cpu6502::BMI()
 {
+	cond_branch_base(flag_n, true);
 	return false;
 }
 
+/* Branch if Not Equal
+| If the zero flag is set to 0 then we jump
+| by an offset (rel_addr) and it requires 1 additional cycle
+| if we don't cross the page boundary and requires 2 if we cross it
+*/
 bool cpu6502::BNE()
 {
+	cond_branch_base(flag_z, false);
 	return false;
 }
 
+/* Branch if Positive
+| If the negative flag is set to 0 then we jump
+| by an offset (rel_addr) and it requires 1 additional cycle
+| if we don't cross the page boundary and requires 2 if we cross it
+*/
 bool cpu6502::BPL()
 {
+	cond_branch_base(flag_n, false);
 	return false;
 }
 
@@ -355,33 +552,61 @@ bool cpu6502::BRK()
 	return false;
 }
 
+/* Branch if Overflow Clear
+| If the overflow flag is set to 0 then we jump
+| by an offset (rel_addr) and it requires 1 additional cycle
+| if we don't cross the page boundary and requires 2 if we cross it
+*/
 bool cpu6502::BVC()
 {
+	cond_branch_base(flag_v, false);
 	return false;
 }
 
+/* Branch if Overflow Set
+| If the overflow flag is set to 1 then we jump
+| by an offset (rel_addr) and it requires 1 additional cycle
+| if we don't cross the page boundary and requires 2 if we cross it
+*/
 bool cpu6502::BVS()
 {
+	cond_branch_base(flag_v, true);
 	return false;
 }
 
+/* Clear Carry Flag
+| Sets the carry flag to 0
+*/
 bool cpu6502::CLC()
 {
+	set_flag(flag_c, false);
 	return false;
 }
 
+/* Clear Decimal Mode
+| Sets the decimal mode flag to 0
+*/
 bool cpu6502::CLD()
 {
+	set_flag(flag_d, false);
 	return false;
 }
 
+/* Clear Interrupt Disable
+| Sets the interrupt disable flag to 0
+*/
 bool cpu6502::CLI()
 {
+	set_flag(flag_i, false);
 	return false;
 }
 
+/* Clear Overflow Flag
+| Sets the overflow flag to 0
+*/
 bool cpu6502::CLV()
 {
+	set_flag(flag_v, false);
 	return false;
 }
 
@@ -510,8 +735,46 @@ bool cpu6502::RTS()
 	return false;
 }
 
+/* SuBtract with a Carry
+| Performs a subtraction:
+| in ADC: A = A + M + C, here: A = A - (1 - C) - M (*).
+| Notice that we have (1 - C) instead of just C because C here is a borrow,
+| Let's rewrite (*) so we can implement this instruction with the ADC instruction:
+| A = A + (-M - 1) + C
+*/
 bool cpu6502::SBC()
 {
+	// Inversing M (memory) is quite trivial since we store all numbers as 2's complement
+	// M becomes ~M + 1
+
+	memorize();
+
+	// ~M
+	uint16_t inv = uint16_t(memory ^ 0xFF); // + 1 - 1
+
+	// A + ~M + C
+	uint16_t res = (uint16_t)memory + inv + (uint16_t)accumulator;
+	if (get_flag(flag_c)) res++;
+
+	// Other stuff is the same as in ADC
+
+	// Overflow
+	bool v = ((uint16_t)accumulator ^ res) & ~((uint16_t)accumulator ^ memory);
+	set_flag(flag_v, v & 0b10000000);
+
+	// Store the result (taking last 1 byte because the result is actually 1 byte in size)
+	accumulator = res & 0x00FF;
+
+	// Check for a 0 result
+	set_flag(flag_z, accumulator == 0);
+
+	// Set if there is something to carry because if there is
+	// we will accumulate it on the next call of the ADC instruction
+	set_flag(flag_c, res > 255);
+
+	// If the first bit is set to 1 then we've got a negative number
+	set_flag(flag_n, res & 0b10000000);
+
 	return false;
 }
 
