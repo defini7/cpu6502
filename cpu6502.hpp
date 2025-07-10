@@ -6,10 +6,12 @@
 
 #include "bus.hpp"
 
-class cpu6502
+class Bus;
+
+class CPU6502
 {
 public:
-    cpu6502();
+    CPU6502();
     
 public:
     void reset();
@@ -20,10 +22,19 @@ public:
     void write(uint16_t addr, uint8_t value);
     uint8_t read(uint16_t addr);
 
-    void push_stack(uint8_t value);
-    uint8_t pop_stack();
+    bool get_flag(uint8_t flag) const;
 
-    void memorize();
+    uint16_t get_abs_addr() const;
+    uint16_t get_rel_addr() const;
+    uint8_t get_accumulator() const;
+    uint8_t get_x() const;
+    uint8_t get_y() const;
+    uint8_t get_stack_ptr() const;
+    uint16_t get_pc() const;
+    uint8_t get_cycles_count() const;
+
+    struct Instruction;
+    const Instruction& get_inst(uint8_t i) const;
 
 protected:
     // Stores a number of clock cycles to execute
@@ -91,6 +102,8 @@ protected:
     */
     uint8_t status = 0;
 
+public:
+
     /* 2) Status flags: https://www.nesdev.org/wiki/Status_flags */
 
     // Note that each enum value is not an index of a specific bit
@@ -108,8 +121,7 @@ protected:
         flag_n = 1 << 7  // negative
     };
 
-    void set_flag(uint8_t flag, bool enable);
-    bool get_flag(uint8_t flag) const;
+private:
 
     /* 3) Opcodes and addressing modes: https://www.nesdev.org/wiki/Instruction_reference */
 
@@ -121,25 +133,28 @@ protected:
     bool DEC();	bool DEX();	bool DEY();	bool EOR();	bool INC();	bool INX();	bool INY();	bool JMP(); bool JSR();	bool LDA();
     bool LDX();	bool LDY();	bool LSR();	bool NOP();	bool ORA();	bool PHA();	bool PHP();	bool PLA();	bool PLP();	bool ROL();
     bool ROR();	bool RTI(); bool RTS();	bool SBC();	bool SEC();	bool SED();	bool SEI();	bool STA();	bool STX();	bool STY();
-    bool TAX();	bool TAY();	bool TSX();	bool TXA();	bool TXS();	bool TYA(); bool INX(); bool INY();
+    bool TAX();	bool TAY();	bool TSX();	bool TXA();	bool TXS();	bool TYA();
+
+    // Used for an invalid opcode
+    bool XXX();
 
     void cond_branch_base(uint8_t flag, bool value);
 
-    // Addressing modes: https://www.zophar.net/fileuploads/2/10532krzvs/6502.txt
+public:
+    // Addressing modes: https://www.zophar.net/fileuploads/2/10532krzvs/6502.txt,
+    // https://www.nesdev.org/obelisk-6502-guide/addressing.html
     bool IMM(); bool ABS(); bool ZPA();
     bool ZPX(); bool ZPY(); bool ABX();
     bool ABY(); bool IMP(); bool REL();
     bool IZX(); bool IZY(); bool IND();
 
-    // Used for an invalid opcode
-    bool XXX();
-
+private:
     struct Instruction
     {
         std::string name;
         
-        bool (cpu6502::*opcode)() = nullptr;
-        bool (cpu6502::*addr_mode)() = nullptr;
+        bool (CPU6502::*opcode)() = nullptr;
+        bool (CPU6502::*addr_mode)() = nullptr;
 
         uint8_t cycles;
     };
@@ -150,5 +165,13 @@ protected:
     
     void IRQ();
     void NMI();
+
+    // Utils
+
+    void push_stack(uint8_t value);
+    uint8_t pop_stack();
+
+    void set_flag(uint8_t flag, bool enable);
+    void memorize();
 
 };
