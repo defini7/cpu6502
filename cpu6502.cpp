@@ -1,35 +1,48 @@
-﻿#include "../Include/cpu6502.hpp"
+﻿#include "../Include/CPU6502.hpp"
 
-cpu6502::cpu6502()
+CPU6502::CPU6502()
 {
+	using c = CPU6502;
+
     instructions =
     {
-		{ "BRK", &BRK, &IMM, 7 }, { "ORA", &ORA, &IZX, 6 }, { "###", &XXX, &IMP, 2 }, { "###", &XXX, &IMP, 8 }, { "###", &NOP, &IMP, 3 }, { "ORA", &ORA, &ZPA, 3 }, { "ASL", &ASL, &ZPA, 5 }, { "###", &XXX, &IMP, 5 }, { "PHP", &PHP, &IMP, 3 }, { "ORA", &ORA, &IMM, 2 }, { "ASL", &ASL, &IMP, 2 }, { "###", &XXX, &IMP, 2 }, { "###", &NOP, &IMP, 4 }, { "ORA", &ORA, &ABS, 4 }, { "ASL", &ASL, &ABS, 6 }, { "###", &XXX, &IMP, 6 },
-		{ "BPL", &BPL, &REL, 2 }, { "ORA", &ORA, &IZY, 5 }, { "###", &XXX, &IMP, 2 }, { "###", &XXX, &IMP, 8 }, { "###", &NOP, &IMP, 4 }, { "ORA", &ORA, &ZPX, 4 }, { "ASL", &ASL, &ZPX, 6 }, { "###", &XXX, &IMP, 6 }, { "CLC", &CLC, &IMP, 2 }, { "ORA", &ORA, &ABY, 4 }, { "###", &NOP, &IMP, 2 }, { "###", &XXX, &IMP, 7 }, { "###", &NOP, &IMP, 4 }, { "ORA", &ORA, &ABX, 4 }, { "ASL", &ASL, &ABX, 7 }, { "###", &XXX, &IMP, 7 },
-		{ "JSR", &JSR, &ABS, 6 }, { "AND", &AND, &IZX, 6 }, { "###", &XXX, &IMP, 2 }, { "###", &XXX, &IMP, 8 }, { "BIT", &BIT, &ZPA, 3 }, { "AND", &AND, &ZPA, 3 }, { "ROL", &ROL, &ZPA, 5 }, { "###", &XXX, &IMP, 5 }, { "PLP", &PLP, &IMP, 4 }, { "AND", &AND, &IMM, 2 }, { "ROL", &ROL, &IMP, 2 }, { "###", &XXX, &IMP, 2 }, { "BIT", &BIT, &ABS, 4 }, { "AND", &AND, &ABS, 4 }, { "ROL", &ROL, &ABS, 6 }, { "###", &XXX, &IMP, 6 },
-		{ "BMI", &BMI, &REL, 2 }, { "AND", &AND, &IZY, 5 }, { "###", &XXX, &IMP, 2 }, { "###", &XXX, &IMP, 8 }, { "###", &NOP, &IMP, 4 }, { "AND", &AND, &ZPX, 4 }, { "ROL", &ROL, &ZPX, 6 }, { "###", &XXX, &IMP, 6 }, { "SEC", &SEC, &IMP, 2 }, { "AND", &AND, &ABY, 4 }, { "###", &NOP, &IMP, 2 }, { "###", &XXX, &IMP, 7 }, { "###", &NOP, &IMP, 4 }, { "AND", &AND, &ABX, 4 }, { "ROL", &ROL, &ABX, 7 }, { "###", &XXX, &IMP, 7 },
-		{ "RTI", &RTI, &IMP, 6 }, { "EOR", &EOR, &IZX, 6 }, { "###", &XXX, &IMP, 2 }, { "###", &XXX, &IMP, 8 }, { "###", &NOP, &IMP, 3 }, { "EOR", &EOR, &ZPA, 3 }, { "LSR", &LSR, &ZPA, 5 }, { "###", &XXX, &IMP, 5 }, { "PHA", &PHA, &IMP, 3 }, { "EOR", &EOR, &IMM, 2 }, { "LSR", &LSR, &IMP, 2 }, { "###", &XXX, &IMP, 2 }, { "JMP", &JMP, &ABS, 3 }, { "EOR", &EOR, &ABS, 4 }, { "LSR", &LSR, &ABS, 6 }, { "###", &XXX, &IMP, 6 },
-		{ "BVC", &BVC, &REL, 2 }, { "EOR", &EOR, &IZY, 5 }, { "###", &XXX, &IMP, 2 }, { "###", &XXX, &IMP, 8 }, { "###", &NOP, &IMP, 4 }, { "EOR", &EOR, &ZPX, 4 }, { "LSR", &LSR, &ZPX, 6 }, { "###", &XXX, &IMP, 6 }, { "CLI", &CLI, &IMP, 2 }, { "EOR", &EOR, &ABY, 4 }, { "###", &NOP, &IMP, 2 }, { "###", &XXX, &IMP, 7 }, { "###", &NOP, &IMP, 4 }, { "EOR", &EOR, &ABX, 4 }, { "LSR", &LSR, &ABX, 7 }, { "###", &XXX, &IMP, 7 },
-		{ "RTS", &RTS, &IMP, 6 }, { "ADC", &ADC, &IZX, 6 }, { "###", &XXX, &IMP, 2 }, { "###", &XXX, &IMP, 8 }, { "###", &NOP, &IMP, 3 }, { "ADC", &ADC, &ZPA, 3 }, { "ROR", &ROR, &ZPA, 5 }, { "###", &XXX, &IMP, 5 }, { "PLA", &PLA, &IMP, 4 }, { "ADC", &ADC, &IMM, 2 }, { "ROR", &ROR, &IMP, 2 }, { "###", &XXX, &IMP, 2 }, { "JMP", &JMP, &IND, 5 }, { "ADC", &ADC, &ABS, 4 }, { "ROR", &ROR, &ABS, 6 }, { "###", &XXX, &IMP, 6 },
-		{ "BVS", &BVS, &REL, 2 }, { "ADC", &ADC, &IZY, 5 }, { "###", &XXX, &IMP, 2 }, { "###", &XXX, &IMP, 8 }, { "###", &NOP, &IMP, 4 }, { "ADC", &ADC, &ZPX, 4 }, { "ROR", &ROR, &ZPX, 6 }, { "###", &XXX, &IMP, 6 }, { "SEI", &SEI, &IMP, 2 }, { "ADC", &ADC, &ABY, 4 }, { "###", &NOP, &IMP, 2 }, { "###", &XXX, &IMP, 7 }, { "###", &NOP, &IMP, 4 }, { "ADC", &ADC, &ABX, 4 }, { "ROR", &ROR, &ABX, 7 }, { "###", &XXX, &IMP, 7 },
-		{ "###", &NOP, &IMP, 2 }, { "STA", &STA, &IZX, 6 }, { "###", &NOP, &IMP, 2 }, { "###", &XXX, &IMP, 6 }, { "STY", &STY, &ZPA, 3 }, { "STA", &STA, &ZPA, 3 }, { "STX", &STX, &ZPA, 3 }, { "###", &XXX, &IMP, 3 }, { "DEY", &DEY, &IMP, 2 }, { "###", &NOP, &IMP, 2 }, { "TXA", &TXA, &IMP, 2 }, { "###", &XXX, &IMP, 2 }, { "STY", &STY, &ABS, 4 }, { "STA", &STA, &ABS, 4 }, { "STX", &STX, &ABS, 4 }, { "###", &XXX, &IMP, 4 },
-		{ "BCC", &BCC, &REL, 2 }, { "STA", &STA, &IZY, 6 }, { "###", &XXX, &IMP, 2 }, { "###", &XXX, &IMP, 6 }, { "STY", &STY, &ZPX, 4 }, { "STA", &STA, &ZPX, 4 }, { "STX", &STX, &ZPY, 4 }, { "###", &XXX, &IMP, 4 }, { "TYA", &TYA, &IMP, 2 }, { "STA", &STA, &ABY, 5 }, { "TXS", &TXS, &IMP, 2 }, { "###", &XXX, &IMP, 5 }, { "###", &NOP, &IMP, 5 }, { "STA", &STA, &ABX, 5 }, { "###", &XXX, &IMP, 5 }, { "###", &XXX, &IMP, 5 },
-		{ "LDY", &LDY, &IMM, 2 }, { "LDA", &LDA, &IZX, 6 }, { "LDX", &LDX, &IMM, 2 }, { "###", &XXX, &IMP, 6 }, { "LDY", &LDY, &ZPA, 3 }, { "LDA", &LDA, &ZPA, 3 }, { "LDX", &LDX, &ZPA, 3 }, { "###", &XXX, &IMP, 3 }, { "TAY", &TAY, &IMP, 2 }, { "LDA", &LDA, &IMM, 2 }, { "TAX", &TAX, &IMP, 2 }, { "###", &XXX, &IMP, 2 }, { "LDY", &LDY, &ABS, 4 }, { "LDA", &LDA, &ABS, 4 }, { "LDX", &LDX, &ABS, 4 }, { "###", &XXX, &IMP, 4 },
-		{ "BCS", &BCS, &REL, 2 }, { "LDA", &LDA, &IZY, 5 }, { "###", &XXX, &IMP, 2 }, { "###", &XXX, &IMP, 5 }, { "LDY", &LDY, &ZPX, 4 }, { "LDA", &LDA, &ZPX, 4 }, { "LDX", &LDX, &ZPY, 4 }, { "###", &XXX, &IMP, 4 }, { "CLV", &CLV, &IMP, 2 }, { "LDA", &LDA, &ABY, 4 }, { "TSX", &TSX, &IMP, 2 }, { "###", &XXX, &IMP, 4 }, { "LDY", &LDY, &ABX, 4 }, { "LDA", &LDA, &ABX, 4 }, { "LDX", &LDX, &ABY, 4 }, { "###", &XXX, &IMP, 4 },
-		{ "CPY", &CPY, &IMM, 2 }, { "CMP", &CMP, &IZX, 6 }, { "###", &NOP, &IMP, 2 }, { "###", &XXX, &IMP, 8 }, { "CPY", &CPY, &ZPA, 3 }, { "CMP", &CMP, &ZPA, 3 }, { "DEC", &DEC, &ZPA, 5 }, { "###", &XXX, &IMP, 5 }, { "IZY", &IZY, &IMP, 2 }, { "CMP", &CMP, &IMM, 2 }, { "DEX", &DEX, &IMP, 2 }, { "###", &XXX, &IMP, 2 }, { "CPY", &CPY, &ABS, 4 }, { "CMP", &CMP, &ABS, 4 }, { "DEC", &DEC, &ABS, 6 }, { "###", &XXX, &IMP, 6 },
-		{ "BNE", &BNE, &REL, 2 }, { "CMP", &CMP, &IZY, 5 }, { "###", &XXX, &IMP, 2 }, { "###", &XXX, &IMP, 8 }, { "###", &NOP, &IMP, 4 }, { "CMP", &CMP, &ZPX, 4 }, { "DEC", &DEC, &ZPX, 6 }, { "###", &XXX, &IMP, 6 }, { "CLD", &CLD, &IMP, 2 }, { "CMP", &CMP, &ABY, 4 }, { "NOP", &NOP, &IMP, 2 }, { "###", &XXX, &IMP, 7 }, { "###", &NOP, &IMP, 4 }, { "CMP", &CMP, &ABX, 4 }, { "DEC", &DEC, &ABX, 7 }, { "###", &XXX, &IMP, 7 },
-		{ "CPX", &CPX, &IMM, 2 }, { "SBC", &SBC, &IZX, 6 }, { "###", &NOP, &IMP, 2 }, { "###", &XXX, &IMP, 8 }, { "CPX", &CPX, &ZPA, 3 }, { "SBC", &SBC, &ZPA, 3 }, { "INC", &INC, &ZPA, 5 }, { "###", &XXX, &IMP, 5 }, { "IZX", &IZX, &IMP, 2 }, { "SBC", &SBC, &IMM, 2 }, { "NOP", &NOP, &IMP, 2 }, { "###", &SBC, &IMP, 2 }, { "CPX", &CPX, &ABS, 4 }, { "SBC", &SBC, &ABS, 4 }, { "INC", &INC, &ABS, 6 }, { "###", &XXX, &IMP, 6 },
-		{ "BEQ", &BEQ, &REL, 2 }, { "SBC", &SBC, &IZY, 5 }, { "###", &XXX, &IMP, 2 }, { "###", &XXX, &IMP, 8 }, { "###", &NOP, &IMP, 4 }, { "SBC", &SBC, &ZPX, 4 }, { "INC", &INC, &ZPX, 6 }, { "###", &XXX, &IMP, 6 }, { "SED", &SED, &IMP, 2 }, { "SBC", &SBC, &ABY, 4 }, { "NOP", &NOP, &IMP, 2 }, { "###", &XXX, &IMP, 7 }, { "###", &NOP, &IMP, 4 }, { "SBC", &SBC, &ABX, 4 }, { "INC", &INC, &ABX, 7 }, { "###", &XXX, &IMP, 7 },
+		{ "BRK", &c::BRK, &c::IMM, 7 }, { "ORA", &c::ORA, &c::IZX, 6 }, { "###", &c::XXX, &c::IMP, 2 }, { "###", &c::XXX, &c::IMP, 8 }, { "###", &c::NOP, &c::IMP, 3 }, { "ORA", &c::ORA, &c::ZPA, 3 }, { "ASL", &c::ASL, &c::ZPA, 5 }, { "###", &c::XXX, &c::IMP, 5 }, { "PHP", &c::PHP, &c::IMP, 3 }, { "ORA", &c::ORA, &c::IMM, 2 }, { "ASL", &c::ASL, &c::IMP, 2 }, { "###", &c::XXX, &c::IMP, 2 }, { "###", &c::NOP, &c::IMP, 4 }, { "ORA", &c::ORA, &c::ABS, 4 }, { "ASL", &c::ASL, &c::ABS, 6 }, { "###", &c::XXX, &c::IMP, 6 },
+		{ "BPL", &c::BPL, &c::REL, 2 }, { "ORA", &c::ORA, &c::IZY, 5 }, { "###", &c::XXX, &c::IMP, 2 }, { "###", &c::XXX, &c::IMP, 8 }, { "###", &c::NOP, &c::IMP, 4 }, { "ORA", &c::ORA, &c::ZPX, 4 }, { "ASL", &c::ASL, &c::ZPX, 6 }, { "###", &c::XXX, &c::IMP, 6 }, { "CLC", &c::CLC, &c::IMP, 2 }, { "ORA", &c::ORA, &c::ABY, 4 }, { "###", &c::NOP, &c::IMP, 2 }, { "###", &c::XXX, &c::IMP, 7 }, { "###", &c::NOP, &c::IMP, 4 }, { "ORA", &c::ORA, &c::ABX, 4 }, { "ASL", &c::ASL, &c::ABX, 7 }, { "###", &c::XXX, &c::IMP, 7 },
+		{ "JSR", &c::JSR, &c::ABS, 6 }, { "AND", &c::AND, &c::IZX, 6 }, { "###", &c::XXX, &c::IMP, 2 }, { "###", &c::XXX, &c::IMP, 8 }, { "BIT", &c::BIT, &c::ZPA, 3 }, { "AND", &c::AND, &c::ZPA, 3 }, { "ROL", &c::ROL, &c::ZPA, 5 }, { "###", &c::XXX, &c::IMP, 5 }, { "PLP", &c::PLP, &c::IMP, 4 }, { "AND", &c::AND, &c::IMM, 2 }, { "ROL", &c::ROL, &c::IMP, 2 }, { "###", &c::XXX, &c::IMP, 2 }, { "BIT", &c::BIT, &c::ABS, 4 }, { "AND", &c::AND, &c::ABS, 4 }, { "ROL", &c::ROL, &c::ABS, 6 }, { "###", &c::XXX, &c::IMP, 6 },
+		{ "BMI", &c::BMI, &c::REL, 2 }, { "AND", &c::AND, &c::IZY, 5 }, { "###", &c::XXX, &c::IMP, 2 }, { "###", &c::XXX, &c::IMP, 8 }, { "###", &c::NOP, &c::IMP, 4 }, { "AND", &c::AND, &c::ZPX, 4 }, { "ROL", &c::ROL, &c::ZPX, 6 }, { "###", &c::XXX, &c::IMP, 6 }, { "SEC", &c::SEC, &c::IMP, 2 }, { "AND", &c::AND, &c::ABY, 4 }, { "###", &c::NOP, &c::IMP, 2 }, { "###", &c::XXX, &c::IMP, 7 }, { "###", &c::NOP, &c::IMP, 4 }, { "AND", &c::AND, &c::ABX, 4 }, { "ROL", &c::ROL, &c::ABX, 7 }, { "###", &c::XXX, &c::IMP, 7 },
+		{ "RTI", &c::RTI, &c::IMP, 6 }, { "EOR", &c::EOR, &c::IZX, 6 }, { "###", &c::XXX, &c::IMP, 2 }, { "###", &c::XXX, &c::IMP, 8 }, { "###", &c::NOP, &c::IMP, 3 }, { "EOR", &c::EOR, &c::ZPA, 3 }, { "LSR", &c::LSR, &c::ZPA, 5 }, { "###", &c::XXX, &c::IMP, 5 }, { "PHA", &c::PHA, &c::IMP, 3 }, { "EOR", &c::EOR, &c::IMM, 2 }, { "LSR", &c::LSR, &c::IMP, 2 }, { "###", &c::XXX, &c::IMP, 2 }, { "JMP", &c::JMP, &c::ABS, 3 }, { "EOR", &c::EOR, &c::ABS, 4 }, { "LSR", &c::LSR, &c::ABS, 6 }, { "###", &c::XXX, &c::IMP, 6 },
+		{ "BVC", &c::BVC, &c::REL, 2 }, { "EOR", &c::EOR, &c::IZY, 5 }, { "###", &c::XXX, &c::IMP, 2 }, { "###", &c::XXX, &c::IMP, 8 }, { "###", &c::NOP, &c::IMP, 4 }, { "EOR", &c::EOR, &c::ZPX, 4 }, { "LSR", &c::LSR, &c::ZPX, 6 }, { "###", &c::XXX, &c::IMP, 6 }, { "CLI", &c::CLI, &c::IMP, 2 }, { "EOR", &c::EOR, &c::ABY, 4 }, { "###", &c::NOP, &c::IMP, 2 }, { "###", &c::XXX, &c::IMP, 7 }, { "###", &c::NOP, &c::IMP, 4 }, { "EOR", &c::EOR, &c::ABX, 4 }, { "LSR", &c::LSR, &c::ABX, 7 }, { "###", &c::XXX, &c::IMP, 7 },
+		{ "RTS", &c::RTS, &c::IMP, 6 }, { "ADC", &c::ADC, &c::IZX, 6 }, { "###", &c::XXX, &c::IMP, 2 }, { "###", &c::XXX, &c::IMP, 8 }, { "###", &c::NOP, &c::IMP, 3 }, { "ADC", &c::ADC, &c::ZPA, 3 }, { "ROR", &c::ROR, &c::ZPA, 5 }, { "###", &c::XXX, &c::IMP, 5 }, { "PLA", &c::PLA, &c::IMP, 4 }, { "ADC", &c::ADC, &c::IMM, 2 }, { "ROR", &c::ROR, &c::IMP, 2 }, { "###", &c::XXX, &c::IMP, 2 }, { "JMP", &c::JMP, &c::IND, 5 }, { "ADC", &c::ADC, &c::ABS, 4 }, { "ROR", &c::ROR, &c::ABS, 6 }, { "###", &c::XXX, &c::IMP, 6 },
+		{ "BVS", &c::BVS, &c::REL, 2 }, { "ADC", &c::ADC, &c::IZY, 5 }, { "###", &c::XXX, &c::IMP, 2 }, { "###", &c::XXX, &c::IMP, 8 }, { "###", &c::NOP, &c::IMP, 4 }, { "ADC", &c::ADC, &c::ZPX, 4 }, { "ROR", &c::ROR, &c::ZPX, 6 }, { "###", &c::XXX, &c::IMP, 6 }, { "SEI", &c::SEI, &c::IMP, 2 }, { "ADC", &c::ADC, &c::ABY, 4 }, { "###", &c::NOP, &c::IMP, 2 }, { "###", &c::XXX, &c::IMP, 7 }, { "###", &c::NOP, &c::IMP, 4 }, { "ADC", &c::ADC, &c::ABX, 4 }, { "ROR", &c::ROR, &c::ABX, 7 }, { "###", &c::XXX, &c::IMP, 7 },
+		{ "###", &c::NOP, &c::IMP, 2 }, { "STA", &c::STA, &c::IZX, 6 }, { "###", &c::NOP, &c::IMP, 2 }, { "###", &c::XXX, &c::IMP, 6 }, { "STY", &c::STY, &c::ZPA, 3 }, { "STA", &c::STA, &c::ZPA, 3 }, { "STX", &c::STX, &c::ZPA, 3 }, { "###", &c::XXX, &c::IMP, 3 }, { "DEY", &c::DEY, &c::IMP, 2 }, { "###", &c::NOP, &c::IMP, 2 }, { "TXA", &c::TXA, &c::IMP, 2 }, { "###", &c::XXX, &c::IMP, 2 }, { "STY", &c::STY, &c::ABS, 4 }, { "STA", &c::STA, &c::ABS, 4 }, { "STX", &c::STX, &c::ABS, 4 }, { "###", &c::XXX, &c::IMP, 4 },
+		{ "BCC", &c::BCC, &c::REL, 2 }, { "STA", &c::STA, &c::IZY, 6 }, { "###", &c::XXX, &c::IMP, 2 }, { "###", &c::XXX, &c::IMP, 6 }, { "STY", &c::STY, &c::ZPX, 4 }, { "STA", &c::STA, &c::ZPX, 4 }, { "STX", &c::STX, &c::ZPY, 4 }, { "###", &c::XXX, &c::IMP, 4 }, { "TYA", &c::TYA, &c::IMP, 2 }, { "STA", &c::STA, &c::ABY, 5 }, { "TXS", &c::TXS, &c::IMP, 2 }, { "###", &c::XXX, &c::IMP, 5 }, { "###", &c::NOP, &c::IMP, 5 }, { "STA", &c::STA, &c::ABX, 5 }, { "###", &c::XXX, &c::IMP, 5 }, { "###", &c::XXX, &c::IMP, 5 },
+		{ "LDY", &c::LDY, &c::IMM, 2 }, { "LDA", &c::LDA, &c::IZX, 6 }, { "LDX", &c::LDX, &c::IMM, 2 }, { "###", &c::XXX, &c::IMP, 6 }, { "LDY", &c::LDY, &c::ZPA, 3 }, { "LDA", &c::LDA, &c::ZPA, 3 }, { "LDX", &c::LDX, &c::ZPA, 3 }, { "###", &c::XXX, &c::IMP, 3 }, { "TAY", &c::TAY, &c::IMP, 2 }, { "LDA", &c::LDA, &c::IMM, 2 }, { "TAX", &c::TAX, &c::IMP, 2 }, { "###", &c::XXX, &c::IMP, 2 }, { "LDY", &c::LDY, &c::ABS, 4 }, { "LDA", &c::LDA, &c::ABS, 4 }, { "LDX", &c::LDX, &c::ABS, 4 }, { "###", &c::XXX, &c::IMP, 4 },
+		{ "BCS", &c::BCS, &c::REL, 2 }, { "LDA", &c::LDA, &c::IZY, 5 }, { "###", &c::XXX, &c::IMP, 2 }, { "###", &c::XXX, &c::IMP, 5 }, { "LDY", &c::LDY, &c::ZPX, 4 }, { "LDA", &c::LDA, &c::ZPX, 4 }, { "LDX", &c::LDX, &c::ZPY, 4 }, { "###", &c::XXX, &c::IMP, 4 }, { "CLV", &c::CLV, &c::IMP, 2 }, { "LDA", &c::LDA, &c::ABY, 4 }, { "TSX", &c::TSX, &c::IMP, 2 }, { "###", &c::XXX, &c::IMP, 4 }, { "LDY", &c::LDY, &c::ABX, 4 }, { "LDA", &c::LDA, &c::ABX, 4 }, { "LDX", &c::LDX, &c::ABY, 4 }, { "###", &c::XXX, &c::IMP, 4 },
+		{ "CPY", &c::CPY, &c::IMM, 2 }, { "CMP", &c::CMP, &c::IZX, 6 }, { "###", &c::NOP, &c::IMP, 2 }, { "###", &c::XXX, &c::IMP, 8 }, { "CPY", &c::CPY, &c::ZPA, 3 }, { "CMP", &c::CMP, &c::ZPA, 3 }, { "DEC", &c::DEC, &c::ZPA, 5 }, { "###", &c::XXX, &c::IMP, 5 }, { "IZY", &c::IZY, &c::IMP, 2 }, { "CMP", &c::CMP, &c::IMM, 2 }, { "DEX", &c::DEX, &c::IMP, 2 }, { "###", &c::XXX, &c::IMP, 2 }, { "CPY", &c::CPY, &c::ABS, 4 }, { "CMP", &c::CMP, &c::ABS, 4 }, { "DEC", &c::DEC, &c::ABS, 6 }, { "###", &c::XXX, &c::IMP, 6 },
+		{ "BNE", &c::BNE, &c::REL, 2 }, { "CMP", &c::CMP, &c::IZY, 5 }, { "###", &c::XXX, &c::IMP, 2 }, { "###", &c::XXX, &c::IMP, 8 }, { "###", &c::NOP, &c::IMP, 4 }, { "CMP", &c::CMP, &c::ZPX, 4 }, { "DEC", &c::DEC, &c::ZPX, 6 }, { "###", &c::XXX, &c::IMP, 6 }, { "CLD", &c::CLD, &c::IMP, 2 }, { "CMP", &c::CMP, &c::ABY, 4 }, { "NOP", &c::NOP, &c::IMP, 2 }, { "###", &c::XXX, &c::IMP, 7 }, { "###", &c::NOP, &c::IMP, 4 }, { "CMP", &c::CMP, &c::ABX, 4 }, { "DEC", &c::DEC, &c::ABX, 7 }, { "###", &c::XXX, &c::IMP, 7 },
+		{ "CPX", &c::CPX, &c::IMM, 2 }, { "SBC", &c::SBC, &c::IZX, 6 }, { "###", &c::NOP, &c::IMP, 2 }, { "###", &c::XXX, &c::IMP, 8 }, { "CPX", &c::CPX, &c::ZPA, 3 }, { "SBC", &c::SBC, &c::ZPA, 3 }, { "INC", &c::INC, &c::ZPA, 5 }, { "###", &c::XXX, &c::IMP, 5 }, { "IZX", &c::IZX, &c::IMP, 2 }, { "SBC", &c::SBC, &c::IMM, 2 }, { "NOP", &c::NOP, &c::IMP, 2 }, { "###", &c::SBC, &c::IMP, 2 }, { "CPX", &c::CPX, &c::ABS, 4 }, { "SBC", &c::SBC, &c::ABS, 4 }, { "INC", &c::INC, &c::ABS, 6 }, { "###", &c::XXX, &c::IMP, 6 },
+		{ "BEQ", &c::BEQ, &c::REL, 2 }, { "SBC", &c::SBC, &c::IZY, 5 }, { "###", &c::XXX, &c::IMP, 2 }, { "###", &c::XXX, &c::IMP, 8 }, { "###", &c::NOP, &c::IMP, 4 }, { "SBC", &c::SBC, &c::ZPX, 4 }, { "INC", &c::INC, &c::ZPX, 6 }, { "###", &c::XXX, &c::IMP, 6 }, { "SED", &c::SED, &c::IMP, 2 }, { "SBC", &c::SBC, &c::ABY, 4 }, { "NOP", &c::NOP, &c::IMP, 2 }, { "###", &c::XXX, &c::IMP, 7 }, { "###", &c::NOP, &c::IMP, 4 }, { "SBC", &c::SBC, &c::ABX, 4 }, { "INC", &c::INC, &c::ABX, 7 }, { "###", &c::XXX, &c::IMP, 7 },
     };
 }
 
-void cpu6502::reset()
+void CPU6502::reset()
 {
-	stack_ptr = 0;
+	stack_ptr = 0xFD;
 	program_counter = 0;
+	accumulator = 0;
+	x = 0; y = 0;
+
+	abs_addr = 0;
+	rel_addr = 0;
+	memory = 0;
+
+	// Reset takes 7 cycles itself
+	cycles = 7;
+
+	program_counter = (read(0xFFFD) << 8) | read(0xFFFC);
 }
 
-void cpu6502::clock()
+void CPU6502::clock()
 {
 	// Wait until the last instruction has been executed
 	if (cycles == 0)
@@ -62,40 +75,40 @@ void cpu6502::clock()
 	cycles--;
 }
 
-void cpu6502::connect_bus(Bus* bus)
+void CPU6502::connect_bus(Bus* bus)
 {
 	this->bus = bus;
 }
 
-void cpu6502::write(uint16_t addr, uint8_t value)
+void CPU6502::write(uint16_t addr, uint8_t value)
 {
 	bus->write(addr, value);
 }
 
-uint8_t cpu6502::read(uint16_t addr)
+uint8_t CPU6502::read(uint16_t addr)
 {
 	return bus->read(addr);
 }
 
-void cpu6502::push_stack(uint8_t value)
+void CPU6502::push_stack(uint8_t value)
 {
 	write(0x100 + (uint16_t)stack_ptr, value);
 	stack_ptr--;
 }
 
-uint8_t cpu6502::pop_stack()
+uint8_t CPU6502::pop_stack()
 {
 	stack_ptr++;
 	return read(0x100 + (uint16_t)stack_ptr);
 }
 
-void cpu6502::memorize()
+void CPU6502::memorize()
 {
 	// We want to memorize data for every addressing mode
 	// except the IMPlied one because there is nothing
 	// to memorize
 
-	if (instructions[opcode].addr_mode != &IMP)
+	if (instructions[opcode].addr_mode != &CPU6502::IMP)
 		memory = read(abs_addr);
 }
 
@@ -104,7 +117,7 @@ void cpu6502::memorize()
 | so it stores the address of the next byte
 | (of the argument of the instruction)
 */
-bool cpu6502::IMM()
+bool CPU6502::IMM()
 {
 	abs_addr = program_counter++;
 	return false;
@@ -113,7 +126,7 @@ bool cpu6502::IMM()
 /* Absolute AM
 | Here we specify the full 16-bit address of the data to use.
 */
-bool cpu6502::ABS()
+bool CPU6502::ABS()
 {
 	// Read 8 rightmost bits
 	abs_addr_1 = read(program_counter++);
@@ -125,8 +138,8 @@ bool cpu6502::ABS()
 }
 
 /* Pages
-| Note that we use 2KB of RAM connected to the bus,
-| 2KB = 256 * 256 bytes so the idea is to split
+| Note that we use 8KB of RAM connected to the bus,
+| 8KB = 256 * 256 bytes so the idea is to split
 | the RAM into 256 pages where each page has 256 bytes in it,
 | since that each address is 16 bit where first 8 bits are the
 | number of a page and the next 8 bits are the offset in that page
@@ -142,7 +155,7 @@ bool cpu6502::ABS()
 | 0'th page and the instruction only provides an
 | offset on that (0'th) page
 */
-bool cpu6502::ZPA()
+bool CPU6502::ZPA()
 {
 	// Set first byte to 0 and set
 	// last byte to the 1 byte address that
@@ -159,7 +172,7 @@ bool cpu6502::ZPA()
 /* Zero Page X AM
 | The same thing as ZPA but also use X register to offset the offset
 */
-bool cpu6502::ZPX()
+bool CPU6502::ZPX()
 {
 	abs_addr_0 = 0x00;
 	abs_addr_1 = read(program_counter++) + x;
@@ -170,7 +183,7 @@ bool cpu6502::ZPX()
 /* Zero Page Y AM
 | The same thing as ZPA but also use Y register to offset the offset
 */
-bool cpu6502::ZPY()
+bool CPU6502::ZPY()
 {
 	abs_addr_0 = 0x00;
 	abs_addr_1 = read(program_counter++) + y;
@@ -182,7 +195,7 @@ bool cpu6502::ZPY()
 | Here we specify the full 16-bit address of the data to use
 | and offset it by the X register
 */
-bool cpu6502::ABX()
+bool CPU6502::ABX()
 {
 	// Read 8 rightmost bits
 	abs_addr_1 = read(program_counter++);
@@ -213,7 +226,7 @@ bool cpu6502::ABX()
 | Here we specify the full 16-bit address of the data to use
 | and offset it by the Y register
 */
-bool cpu6502::ABY()
+bool CPU6502::ABY()
 {
 	// The same as for X register but here we use Y register
 
@@ -233,7 +246,7 @@ bool cpu6502::ABY()
 | simply saves a value from
 | an accumulator into a memory
 */
-bool cpu6502::IMP()
+bool CPU6502::IMP()
 {
 	memory = accumulator;
 	return false;
@@ -244,7 +257,7 @@ bool cpu6502::IMP()
 | set relative address to jump from the current location in the program
 | to another
 */
-bool cpu6502::REL()
+bool CPU6502::REL()
 {
 	rel_addr = read(program_counter++);
 
@@ -263,7 +276,7 @@ bool cpu6502::REL()
 | Takes a value from the RAM and uses it as a pointer to the data,
 | also offsets the pointer by the X register
 */
-bool cpu6502::IZX()
+bool CPU6502::IZX()
 {
 	uint16_t ptr = read(program_counter++);
 
@@ -278,7 +291,7 @@ bool cpu6502::IZX()
 | also offsets not the pointer but the final address itself by the Y register.
 | Notice that here we also check for a page crossing.
 */
-bool cpu6502::IZY()
+bool CPU6502::IZY()
 {
 	uint16_t ptr = read(program_counter++);
 
@@ -301,7 +314,7 @@ bool cpu6502::IZY()
 | The argument of the executed instruction is an address
 | of the address of the data that must be used
 */
-bool cpu6502::IND()
+bool CPU6502::IND()
 {
 	// Read right and left byte of the pointer
 	uint16_t ptr_right = read(program_counter++);
@@ -331,7 +344,7 @@ bool cpu6502::IND()
 	return false;
 }
 
-void cpu6502::set_flag(uint8_t flag, bool enable)
+void CPU6502::set_flag(uint8_t flag, bool enable)
 {
 	// Note that flag is a value from the Flags enum
 	// because there we have precalculated an offset
@@ -355,9 +368,54 @@ void cpu6502::set_flag(uint8_t flag, bool enable)
 	}
 }
 
-bool cpu6502::get_flag(uint8_t flag) const
+bool CPU6502::get_flag(uint8_t flag) const
 {
 	return (status & flag) != 0;
+}
+
+uint16_t CPU6502::get_abs_addr() const
+{
+	return abs_addr;
+}
+
+uint16_t CPU6502::get_rel_addr() const
+{
+	return rel_addr;
+}
+
+uint8_t CPU6502::get_accumulator() const
+{
+	return accumulator;
+}
+
+uint8_t CPU6502::get_x() const
+{
+	return x;
+}
+
+uint8_t CPU6502::get_y() const
+{
+	return y;
+}
+
+uint8_t CPU6502::get_stack_ptr() const
+{
+	return stack_ptr;
+}
+
+uint16_t CPU6502::get_pc() const
+{
+	return program_counter;
+}
+
+uint8_t CPU6502::get_cycles_count() const
+{
+	return cycles;
+}
+
+const CPU6502::Instruction& CPU6502::get_inst(uint8_t i) const
+{
+	return instructions[i];
 }
 
 /* ADd with a Carry
@@ -366,7 +424,7 @@ bool cpu6502::get_flag(uint8_t flag) const
 | and of course they have their own numeric borders, so this operation
 | changes negative (n), overflow (v) flags and zero (z) flags
 */
-bool cpu6502::ADC()
+bool CPU6502::ADC()
 {
 	/* Situations when overflow is occured:
 	* positive + positive = negative
@@ -404,7 +462,7 @@ bool cpu6502::ADC()
 | Performs A = A & memory
 | Sets Z and N flags
 */
-bool cpu6502::AND()
+bool CPU6502::AND()
 {
 	memorize();
 	accumulator &= memory;
@@ -420,7 +478,7 @@ bool cpu6502::AND()
 | Performs M << 1 and changes carry (c), zero (z) and negative (n) flags
 | and stores the result into accumulator or memory
 */
-bool cpu6502::ASL()
+bool CPU6502::ASL()
 {
 	memorize();
 	uint16_t res_ext = (uint16_t)memory << 1;
@@ -436,7 +494,7 @@ bool cpu6502::ASL()
 	// We write to the accumulator if the addressing mode is implied
 	// otherwise we write to the memory
 
-	if (instructions[opcode].addr_mode == &IMP)
+	if (instructions[opcode].addr_mode == &CPU6502::IMP)
 		accumulator = res;
 	else
 		write(abs_addr, res);
@@ -457,7 +515,7 @@ bool cpu6502::ASL()
 /* Conditional Branching Base
 | Simply hides all repetitive code for every branching instruction
 */
-void cpu6502::cond_branch_base(uint8_t flag, bool value)
+void CPU6502::cond_branch_base(uint8_t flag, bool value)
 {
 	if (get_flag(flag) == value)
 	{
@@ -481,7 +539,7 @@ void cpu6502::cond_branch_base(uint8_t flag, bool value)
 | by an offset (rel_addr) and it requires 1 additional cycle
 | if we don't cross the page boundary and requires 2 if we cross it
 */
-bool cpu6502::BCC()
+bool CPU6502::BCC()
 {
 	cond_branch_base(flag_c, false);
 	return false;
@@ -492,7 +550,7 @@ bool cpu6502::BCC()
 | by an offset (rel_addr) and it requires 1 additional cycle
 | if we don't cross the page boundary and requires 2 if we cross it
 */
-bool cpu6502::BCS()
+bool CPU6502::BCS()
 {
 	cond_branch_base(flag_c, true);
 	return false;
@@ -503,7 +561,7 @@ bool cpu6502::BCS()
 | by an offset (rel_addr) and it requires 1 additional cycle
 | if we don't cross the page boundary and requires 2 if we cross it
 */
-bool cpu6502::BEQ()
+bool CPU6502::BEQ()
 {
 	cond_branch_base(flag_z, true);
 	return false;
@@ -513,7 +571,7 @@ bool cpu6502::BEQ()
 | This instruction doesn't change the memory or the registers,
 | it changes Z, V and N flags
 */
-bool cpu6502::BIT()
+bool CPU6502::BIT()
 {
 	memorize();
 
@@ -532,7 +590,7 @@ bool cpu6502::BIT()
 | by an offset (rel_addr) and it requires 1 additional cycle
 | if we don't cross the page boundary and requires 2 if we cross it
 */
-bool cpu6502::BMI()
+bool CPU6502::BMI()
 {
 	cond_branch_base(flag_n, true);
 	return false;
@@ -543,7 +601,7 @@ bool cpu6502::BMI()
 | by an offset (rel_addr) and it requires 1 additional cycle
 | if we don't cross the page boundary and requires 2 if we cross it
 */
-bool cpu6502::BNE()
+bool CPU6502::BNE()
 {
 	cond_branch_base(flag_z, false);
 	return false;
@@ -554,13 +612,13 @@ bool cpu6502::BNE()
 | by an offset (rel_addr) and it requires 1 additional cycle
 | if we don't cross the page boundary and requires 2 if we cross it
 */
-bool cpu6502::BPL()
+bool CPU6502::BPL()
 {
 	cond_branch_base(flag_n, false);
 	return false;
 }
 
-bool cpu6502::BRK()
+bool CPU6502::BRK()
 {
 	return false;
 }
@@ -570,7 +628,7 @@ bool cpu6502::BRK()
 | by an offset (rel_addr) and it requires 1 additional cycle
 | if we don't cross the page boundary and requires 2 if we cross it
 */
-bool cpu6502::BVC()
+bool CPU6502::BVC()
 {
 	cond_branch_base(flag_v, false);
 	return false;
@@ -581,7 +639,7 @@ bool cpu6502::BVC()
 | by an offset (rel_addr) and it requires 1 additional cycle
 | if we don't cross the page boundary and requires 2 if we cross it
 */
-bool cpu6502::BVS()
+bool CPU6502::BVS()
 {
 	cond_branch_base(flag_v, true);
 	return false;
@@ -590,7 +648,7 @@ bool cpu6502::BVS()
 /* Clear Carry Flag
 | Sets the carry flag to 0
 */
-bool cpu6502::CLC()
+bool CPU6502::CLC()
 {
 	set_flag(flag_c, false);
 	return false;
@@ -599,7 +657,7 @@ bool cpu6502::CLC()
 /* Clear Decimal Mode
 | Sets the decimal mode flag to 0
 */
-bool cpu6502::CLD()
+bool CPU6502::CLD()
 {
 	set_flag(flag_d, false);
 	return false;
@@ -608,7 +666,7 @@ bool cpu6502::CLD()
 /* Clear Interrupt Disable
 | Sets the interrupt disable flag to 0
 */
-bool cpu6502::CLI()
+bool CPU6502::CLI()
 {
 	set_flag(flag_i, false);
 	return false;
@@ -617,7 +675,7 @@ bool cpu6502::CLI()
 /* Clear Overflow Flag
 | Sets the overflow flag to 0
 */
-bool cpu6502::CLV()
+bool CPU6502::CLV()
 {
 	set_flag(flag_v, false);
 	return false;
@@ -628,7 +686,7 @@ bool cpu6502::CLV()
 | by performing A - M and then it modifies carry, zero and negative flags,
 | notice that it does not change a value of anything
 */
-bool cpu6502::CMP()
+bool CPU6502::CMP()
 {
 	memorize();
 	uint16_t res = (uint16_t)accumulator - (uint16_t)memory;
@@ -643,7 +701,7 @@ bool cpu6502::CMP()
 /* CoMPare X
 | The same as CMP but here we use X register instead of the accumulator
 */
-bool cpu6502::CPX()
+bool CPU6502::CPX()
 {
 	memorize();
 	uint16_t res = (uint16_t)x - (uint16_t)memory;
@@ -658,7 +716,7 @@ bool cpu6502::CPX()
 /* CoMPare Y
 | The same as CMP but here we use Y register instead of the accumulator
 */
-bool cpu6502::CPY()
+bool CPU6502::CPY()
 {
 	memorize();
 
@@ -673,7 +731,7 @@ bool cpu6502::CPY()
 | Performs M = M - 1 and there is no equivalent for the accumulator,
 | only affects Z and N flags
 */
-bool cpu6502::DEC()
+bool CPU6502::DEC()
 {
 	memorize();
 
@@ -689,7 +747,7 @@ bool cpu6502::DEC()
 /* DEcrement X
 | Decrements a value of the X register and sets Z and N flags
 */
-bool cpu6502::DEX()
+bool CPU6502::DEX()
 {
 	x--;
 
@@ -702,7 +760,7 @@ bool cpu6502::DEX()
 /* DEcrement Y
 | Decrements a value of the Y register and sets Z and N flags
 */
-bool cpu6502::DEY()
+bool CPU6502::DEY()
 {
 	y--;
 
@@ -715,7 +773,7 @@ bool cpu6502::DEY()
 /* Exclusive OR
 | Performs A = A ^ M and modifies the Z and N flags
 */
-bool cpu6502::EOR()
+bool CPU6502::EOR()
 {
 	memorize();
 	accumulator ^= memory;
@@ -730,7 +788,7 @@ bool cpu6502::EOR()
 | Performs M = M + 1 and notice there is no alternative for the accumulator,
 | also modifies Z and N flags
 */
-bool cpu6502::INC()
+bool CPU6502::INC()
 {
 	memorize();
 
@@ -743,16 +801,22 @@ bool cpu6502::INC()
 	return false;
 }
 
-bool cpu6502::XXX()
+bool CPU6502::XXX()
 {
 	// Nothing to do
 	return false;
 }
 
+void CPU6502::IRQ()
+{}
+
+void CPU6502::NMI()
+{}
+
 /* JuMP
 | Jumping to the specified address
 */
-bool cpu6502::JMP()
+bool CPU6502::JMP()
 {
 	// We have precalculated the address in the addressing mode
 	program_counter = abs_addr; 
@@ -763,7 +827,7 @@ bool cpu6502::JMP()
 | Pushes the pointer to the previous instruction to the stack and
 | jumps to the new address
 */
-bool cpu6502::JSR()
+bool CPU6502::JSR()
 {
 	// We decrement it because the return address on the stack
 	// points 1 byte before the start of the next instruction
@@ -781,7 +845,7 @@ bool cpu6502::JSR()
 | Loads the memory content into the accumulator,
 | sets zero and negative flags
 */
-bool cpu6502::LDA()
+bool CPU6502::LDA()
 {
 	memorize();
 	accumulator = memory;
@@ -796,7 +860,7 @@ bool cpu6502::LDA()
 | Loads the memory content into the X register,
 | sets zero and negative flags
 */
-bool cpu6502::LDX()
+bool CPU6502::LDX()
 {
 	memorize();
 	x = memory;
@@ -811,7 +875,7 @@ bool cpu6502::LDX()
 | Loads the memory content into the Y register,
 | sets zero and negative flags
 */
-bool cpu6502::LDY()
+bool CPU6502::LDY()
 {
 	memorize();
 	y = memory;
@@ -827,7 +891,7 @@ bool cpu6502::LDY()
 | M >> 1 rather than M << 1 and sets a carry flag with
 | the first bit of the memory value
 */
-bool cpu6502::LSR()
+bool CPU6502::LSR()
 {
 	memorize();
 	uint16_t res_ext = (uint16_t)memory >> 1;
@@ -843,7 +907,7 @@ bool cpu6502::LSR()
 	// We write to the accumulator if the addressing mode is implied
 	// otherwise we write to the memory
 
-	if (instructions[opcode].addr_mode == &IMP)
+	if (instructions[opcode].addr_mode == &CPU6502::IMP)
 		accumulator = res;
 	else
 		write(abs_addr, res);
@@ -855,7 +919,7 @@ bool cpu6502::LSR()
 | Does nothing and requires no additional
 | clock cycles, does it?
 */
-bool cpu6502::NOP()
+bool CPU6502::NOP()
 {
 	return false;
 }
@@ -863,7 +927,7 @@ bool cpu6502::NOP()
 /* Bitwise OR
 | Performs A = A | M and modifies the Z and N flags
 */
-bool cpu6502::ORA()
+bool CPU6502::ORA()
 {
 	memorize();
 	accumulator |= memory;
@@ -877,7 +941,7 @@ bool cpu6502::ORA()
 /* PusH Accumulator
 | Pushes the value of the accumulator to the stack
 */
-bool cpu6502::PHA()
+bool CPU6502::PHA()
 {
 	push_stack(accumulator);
 	return false;
@@ -886,7 +950,7 @@ bool cpu6502::PHA()
 /* PusH Processor status
 | Pushes processor status to the stack
 */
-bool cpu6502::PHP()
+bool CPU6502::PHP()
 {
 	push_stack(status | flag_b | flag_1);
 	return false;
@@ -895,7 +959,7 @@ bool cpu6502::PHP()
 /* PuLl Accumulator
 | Pops a value from a stack and stores it in the accumulator
 */
-bool cpu6502::PLA()
+bool CPU6502::PLA()
 {
 	accumulator = pop_stack();
 
@@ -908,7 +972,7 @@ bool cpu6502::PLA()
 /* PuLl Processor status
 | Pops a value from a stack and stores it in the status register
 */
-bool cpu6502::PLP()
+bool CPU6502::PLP()
 {
 	status = pop_stack();
 	set_flag(flag_1, true);
@@ -919,7 +983,7 @@ bool cpu6502::PLP()
 | Shifts one bit of the memory to the left and storing it in
 | the accumulator or in the memory
 */
-bool cpu6502::ROL()
+bool CPU6502::ROL()
 {
 	memorize();
 
@@ -934,7 +998,7 @@ bool cpu6502::ROL()
 	set_flag(flag_z, res_low == 0);
 	set_flag(flag_n, res_low & 0b10000000);
 
-	if (instructions[opcode].addr_mode == &IMP)
+	if (instructions[opcode].addr_mode == &CPU6502::IMP)
 		accumulator = res_low;
 	else
 		write(abs_addr, res_low);
@@ -946,7 +1010,7 @@ bool cpu6502::ROL()
 | Shifts one bit of the memory to the right and storing it in
 | the accumulator or in the memory
 */
-bool cpu6502::ROR()
+bool CPU6502::ROR()
 {
 	memorize();
 
@@ -962,7 +1026,7 @@ bool cpu6502::ROR()
 	set_flag(flag_z, res_low == 0);
 	set_flag(flag_n, res_low & 0b10000000);
 
-	if (instructions[opcode].addr_mode == &IMP)
+	if (instructions[opcode].addr_mode == &CPU6502::IMP)
 		accumulator = res_low;
 	else
 		write(abs_addr, res_low);
@@ -970,12 +1034,12 @@ bool cpu6502::ROR()
 	return false;
 }
 
-bool cpu6502::RTI()
+bool CPU6502::RTI()
 {
 	return false;
 }
 
-bool cpu6502::RTS()
+bool CPU6502::RTS()
 {
 	return false;
 }
@@ -987,7 +1051,7 @@ bool cpu6502::RTS()
 | Let's rewrite (*) so we can implement this instruction with the ADC instruction:
 | A = A + (-M - 1) + C
 */
-bool cpu6502::SBC()
+bool CPU6502::SBC()
 {
 	// Inversing M (memory) is quite trivial since we store all numbers as 2's complement
 	// M becomes ~M + 1
@@ -1025,7 +1089,7 @@ bool cpu6502::SBC()
 /* SEt Carry
 | Sets the value of the carry flag to 1
 */
-bool cpu6502::SEC()
+bool CPU6502::SEC()
 {
 	set_flag(flag_c, true);
 	return false;
@@ -1034,7 +1098,7 @@ bool cpu6502::SEC()
 /* SEt Decimal
 | Sets the value of the decimal flag to 1
 */
-bool cpu6502::SED()
+bool CPU6502::SED()
 {
 	set_flag(flag_d, true);
 	return false;
@@ -1043,7 +1107,7 @@ bool cpu6502::SED()
 /* SEt Interrupt disable
 | Sets the value of the interrupt disable flag to 1
 */
-bool cpu6502::SEI()
+bool CPU6502::SEI()
 {
 	set_flag(flag_i, true);
 	return false;
@@ -1052,7 +1116,7 @@ bool cpu6502::SEI()
 /* STore Accumulator
 | Stores the value of the accumulator into the memory
 */
-bool cpu6502::STA()
+bool CPU6502::STA()
 {
 	write(abs_addr, accumulator);
 	return false;
@@ -1061,7 +1125,7 @@ bool cpu6502::STA()
 /* STore X
 | Stores the value of the X register into the memory
 */
-bool cpu6502::STX()
+bool CPU6502::STX()
 {
 	write(abs_addr, x);
 	return false;
@@ -1070,7 +1134,7 @@ bool cpu6502::STX()
 /* STore Y
 | Stores the value of the Y register into the memory
 */
-bool cpu6502::STY()
+bool CPU6502::STY()
 {
 	write(abs_addr, y);
 	return false;
@@ -1079,7 +1143,7 @@ bool cpu6502::STY()
 /* Transfer A to X
 | Transfers the value of the accumulator to the X register
 */
-bool cpu6502::TAX()
+bool CPU6502::TAX()
 {
 	x = accumulator;
 
@@ -1092,7 +1156,7 @@ bool cpu6502::TAX()
 /* Transfer Accumulator to Y
 | Transfers the value of the accumulator to the Y register
 */
-bool cpu6502::TAY()
+bool CPU6502::TAY()
 {
 	y = accumulator;
 
@@ -1105,7 +1169,7 @@ bool cpu6502::TAY()
 /* Transfer Stack pointer to X
 | Transfers the value of the stack pointer to the X register
 */
-bool cpu6502::TSX()
+bool CPU6502::TSX()
 {
 	x = stack_ptr;
 
@@ -1118,7 +1182,7 @@ bool cpu6502::TSX()
 /* Transfer X to Accumlator
 | Transfers the value of the X register to the accumulator
 */
-bool cpu6502::TXA()
+bool CPU6502::TXA()
 {
 	accumulator = x;
 	return false;
@@ -1127,7 +1191,7 @@ bool cpu6502::TXA()
 /* Transfer X to Stack pointer
 | Transfers the value of the stack pointer to the X register
 */
-bool cpu6502::TXS()
+bool CPU6502::TXS()
 {
 	stack_ptr = x;
 
@@ -1140,7 +1204,7 @@ bool cpu6502::TXS()
 /* Transfer Y to Accumlator
 | Transfers the value of the Y register to the accumulator
 */
-bool cpu6502::TYA()
+bool CPU6502::TYA()
 {
 	accumulator = y;
 
@@ -1153,7 +1217,7 @@ bool cpu6502::TYA()
 /* INcrement X
 | Performs X = X + 1 and sets Z and N flags
 */
-bool cpu6502::INX()
+bool CPU6502::INX()
 {
 	x++;
 
@@ -1166,7 +1230,7 @@ bool cpu6502::INX()
 /* INcrement Y
 | Performs Y = Y + 1 and sets Z and N flags
 */
-bool cpu6502::INY()
+bool CPU6502::INY()
 {
 	y++;
 
