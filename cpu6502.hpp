@@ -21,6 +21,7 @@ public:
     uint8_t read(uint16_t addr);
 
     void push_stack(uint8_t value);
+    uint8_t pop_stack();
 
     void memorize();
 

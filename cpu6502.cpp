@@ -83,6 +83,12 @@ void cpu6502::push_stack(uint8_t value)
 	stack_ptr--;
 }
 
+uint8_t cpu6502::pop_stack()
+{
+	stack_ptr++;
+	return read(0x100 + (uint16_t)stack_ptr);
+}
+
 void cpu6502::memorize()
 {
 	// We want to memorize data for every addressing mode
@@ -886,23 +892,81 @@ bool cpu6502::PHP()
 	return false;
 }
 
+/* PuLl Accumulator
+| Pops a value from a stack and stores it in the accumulator
+*/
 bool cpu6502::PLA()
 {
+	accumulator = pop_stack();
+
+	set_flag(flag_z, accumulator == 0);
+	set_flag(flag_n, accumulator & 0b10000000);
+
 	return false;
 }
 
+/* PuLl Processor status
+| Pops a value from a stack and stores it in the status register
+*/
 bool cpu6502::PLP()
 {
+	status = pop_stack();
+	set_flag(flag_1, true);
 	return false;
 }
 
+/* ROtate Left
+| Shifts one bit of the memory to the left and storing it in
+| the accumulator or in the memory
+*/
 bool cpu6502::ROL()
 {
+	memorize();
+
+	uint16_t carry = get_flag(flag_c);
+
+	// Setting the low byte of the result to 1 if there is something to carry
+	uint16_t res = uint16_t(memory << 1) | carry;
+
+	uint8_t res_low = res & 0x00FF;
+
+	set_flag(flag_c, memory & 0b10000000);
+	set_flag(flag_z, res_low == 0);
+	set_flag(flag_n, res_low & 0b10000000);
+
+	if (instructions[opcode].addr_mode == &IMP)
+		accumulator = res_low;
+	else
+		write(abs_addr, res_low);
+
 	return false;
 }
 
+/* ROtate Right
+| Shifts one bit of the memory to the right and storing it in
+| the accumulator or in the memory
+*/
 bool cpu6502::ROR()
 {
+	memorize();
+
+	uint16_t carry = get_flag(flag_c);
+
+	// Setting a high byte of the result to 1 if there is something to carry
+	uint16_t res = uint16_t(memory >> 1) | (carry << 7);
+
+	uint8_t res_low = res & 0x00FF;
+
+	// If the low byte is set to 1 then there is something to carry
+	set_flag(flag_c, memory & 1);
+	set_flag(flag_z, res_low == 0);
+	set_flag(flag_n, res_low & 0b10000000);
+
+	if (instructions[opcode].addr_mode == &IMP)
+		accumulator = res_low;
+	else
+		write(abs_addr, res_low);
+
 	return false;
 }
 
@@ -949,8 +1013,7 @@ bool cpu6502::SBC()
 	// Check for a 0 result
 	set_flag(flag_z, accumulator == 0);
 
-	// Set if there is something to carry because if there is
-	// we will accumulate it on the next call of the ADC instruction
+	// We can treat a carry as an overflow of the unsigned char value
 	set_flag(flag_c, res > 255);
 
 	// If the first bit is set to 1 then we've got a negative number
@@ -959,63 +1022,131 @@ bool cpu6502::SBC()
 	return false;
 }
 
+/* SEt Carry
+| Sets the value of the carry flag to 1
+*/
 bool cpu6502::SEC()
 {
+	set_flag(flag_c, true);
 	return false;
 }
 
+/* SEt Decimal
+| Sets the value of the decimal flag to 1
+*/
 bool cpu6502::SED()
 {
+	set_flag(flag_d, true);
 	return false;
 }
 
+/* SEt Interrupt disable
+| Sets the value of the interrupt disable flag to 1
+*/
 bool cpu6502::SEI()
 {
+	set_flag(flag_i, true);
 	return false;
 }
 
+/* STore Accumulator
+| Stores the value of the accumulator into the memory
+*/
 bool cpu6502::STA()
 {
+	write(abs_addr, accumulator);
 	return false;
 }
 
+/* STore X
+| Stores the value of the X register into the memory
+*/
 bool cpu6502::STX()
 {
+	write(abs_addr, x);
 	return false;
 }
 
+/* STore Y
+| Stores the value of the Y register into the memory
+*/
 bool cpu6502::STY()
 {
+	write(abs_addr, y);
 	return false;
 }
 
+/* Transfer A to X
+| Transfers the value of the accumulator to the X register
+*/
 bool cpu6502::TAX()
 {
+	x = accumulator;
+
+	set_flag(flag_z, x == 0);
+	set_flag(flag_n, x & 0b10000000);
+
 	return false;
 }
 
+/* Transfer Accumulator to Y
+| Transfers the value of the accumulator to the Y register
+*/
 bool cpu6502::TAY()
 {
+	y = accumulator;
+
+	set_flag(flag_z, y == 0);
+	set_flag(flag_n, y & 0b10000000);
+
 	return false;
 }
 
+/* Transfer Stack pointer to X
+| Transfers the value of the stack pointer to the X register
+*/
 bool cpu6502::TSX()
 {
+	x = stack_ptr;
+
+	set_flag(flag_z, x == 0);
+	set_flag(flag_n, x & 0b10000000);
+
 	return false;
 }
 
+/* Transfer X to Accumlator
+| Transfers the value of the X register to the accumulator
+*/
 bool cpu6502::TXA()
 {
+	accumulator = x;
 	return false;
 }
 
+/* Transfer X to Stack pointer
+| Transfers the value of the stack pointer to the X register
+*/
 bool cpu6502::TXS()
 {
+	stack_ptr = x;
+
+	set_flag(flag_z, x == 0);
+	set_flag(flag_n, x & 0b10000000);
+
 	return false;
 }
 
+/* Transfer Y to Accumlator
+| Transfers the value of the Y register to the accumulator
+*/
 bool cpu6502::TYA()
 {
+	accumulator = y;
+
+	set_flag(flag_z, y == 0);
+	set_flag(flag_n, y & 0b10000000);
+
 	return false;
 }
 
