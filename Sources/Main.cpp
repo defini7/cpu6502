@@ -29,7 +29,7 @@ public:
 
     std::unordered_map<uint16_t, std::string> program;
 
-    void disassemble()
+    void disassemble(uint16_t program_size)
     {
         uint16_t program_end = program_start + program_size - 1;
         uint16_t addr = program_start;
@@ -117,7 +117,7 @@ public:
     // Drawing the program with the center at PC
     void draw_program(int x, int y, int pc, int offset)
     {
-        uint16_t program_end = program_start + program_size;
+        uint16_t program_end = program_start + program.size();
         int oy = 0;
 
         for (int i = pc - offset; i < pc + offset; i++)
@@ -133,7 +133,19 @@ public:
         }
     }
 
-    uint16_t program_size = 0;
+    void draw_ram(int x, int y, int start, int end)
+    {
+        int oy = 0;
+
+        for (int i = start; i <= end; i++)
+        {
+            std::stringstream ss;
+            ss << "$" << to_hex(i, 4) << ": " << to_hex(cpu.read(i), 2);
+
+            DrawString(x, y + oy, ss.str());
+            oy += 10;
+        }
+    }
 
 protected:
     bool OnUserCreate() override
@@ -149,10 +161,22 @@ protected:
         SEC            ; Set carry
         LDA #$50
         SBC #$30       ; A = $50 - $30 = $20
+
+        38 A9 50 E9 30
+        */
+
+        /*
+        LDA #$20
+        LDX #$30
+        LDY #$40
+
+        A9 20 A2 30 A0 40
         */
 
         std::stringstream code;
-        code << "38 A9 50 E9 30";
+        code << "A9 20 A2 30 A0 40";
+
+        uint16_t bytes = 0;
 
         while (!code.eof())
         {
@@ -160,10 +184,10 @@ protected:
             code >> byte;
             cpu.write(addr++, std::stoi(byte, nullptr, 16));
 
-            program_size++;
+            bytes++;
         }
 
-        disassemble();
+        disassemble(bytes);
 
         // Providing a program counter
         cpu.write(0xFFFC, program_start & 0x00FF);
@@ -183,6 +207,12 @@ protected:
             do cpu.clock();
             while (cpu.get_cycles_count() != 0);
         }
+
+        if (i->GetKeyState(def::Key::I).released)
+            cpu.IRQ();
+
+        if (i->GetKeyState(def::Key::N).released)
+            cpu.NMI();
 
         if (i->GetKeyState(def::Key::R).released)
             cpu.reset();
@@ -213,8 +243,12 @@ protected:
         DrawString(12, y += 12, "PC: $" + to_hex(cpu.get_pc(), 4));
         DrawString(12, y += 12, "Cycles: $" + to_hex(cpu.get_cycles_count(), 2));
 
-        // Draw program
-        draw_program(200, 50, cpu.get_pc(), 20);
+        draw_program(160, 50, cpu.get_pc(), 20);
+
+        // Draw some portion of RAM
+        draw_ram(330, 50, 0, 0x2A);
+        draw_ram(430, 50, 0x8000, 0x802A);
+        draw_ram(20, 200, 0x100, 0x110);
 
         return true;
     }

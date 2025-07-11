@@ -819,11 +819,58 @@ bool CPU6502::XXX()
 	return false;
 }
 
-void CPU6502::IRQ()
-{}
+/* Interrupts
+| They are basically used for interacting with other devices connected
+| to the bus, so they just save the CPU state first and then jump to a specific
+| memory location to start executing instructions from there
+*/
 
+/* Interrupt ReQuest
+| Saves the CPU state and jumps to the fixed memory location,
+| it works only if the I flag is set to 0. This kind of interrupt
+| is used for I/O handling stuff
+*/
+void CPU6502::IRQ()
+{
+	// Don't perform an interrupt if it's disabled
+	if (get_flag(flag_i))
+		return;
+
+	// Pushing the program counter to the stack
+	push_stack((program_counter << 8) & 0x00FF);
+	push_stack(program_counter & 0x00FF);
+
+	push_stack(status);
+
+	// Disabling further interrupts to prevent nested interrupts
+	set_flag(flag_i, true);
+
+	// Reading a new program counter
+	// from 0xFFFF (high byte) and 0xFFFE (low byte)
+	program_counter = ((uint16_t)read(0xFFFF) << 8) | (uint16_t)read(0xFFFE);
+}
+
+/* Non-Maskable Interrupt
+| Performs the same thing as IRQ but NMI can't be ignored
+| and the address of reading the program counter from differs.
+| It is used for handling critical events (e.g. hardware failures)
+| that can't be delayed
+*/
 void CPU6502::NMI()
-{}
+{
+	// Pushing the program counter to the stack
+	push_stack((program_counter << 8) & 0x00FF);
+	push_stack(program_counter & 0x00FF);
+
+	push_stack(status);
+
+	// Still disabling further interrupts to prevent nested interrupts
+	set_flag(flag_i, true);
+
+	// Reading a new program counter
+	// from 0xFFFB (high byte) and 0xFFFA (low byte)
+	program_counter = ((uint16_t)read(0xFFFB) << 8) | (uint16_t)read(0xFFFA);
+}
 
 /* JuMP
 | Jumping to the specified address
@@ -1048,11 +1095,13 @@ bool CPU6502::ROR()
 
 bool CPU6502::RTI()
 {
+	// TODO
 	return false;
 }
 
 bool CPU6502::RTS()
 {
+	// TODO
 	return false;
 }
 

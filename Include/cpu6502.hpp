@@ -121,7 +121,7 @@ public:
         flag_n = 1 << 7  // negative
     };
 
-private:
+protected:
 
     /* 3) Opcodes and addressing modes: https://www.nesdev.org/wiki/Instruction_reference */
 
@@ -148,7 +148,7 @@ public:
     bool ABY(); bool IMP(); bool REL();
     bool IZX(); bool IZY(); bool IND();
 
-private:
+protected:
     struct Instruction
     {
         std::string name;
@@ -161,10 +161,14 @@ private:
 
     std::vector<Instruction> instructions;
 
+public:
+
     /* 4) Interrupts: https://www.nesdev.org/wiki/CPU_interrupts */
     
     void IRQ();
     void NMI();
+
+protected:
 
     // Utils
 
