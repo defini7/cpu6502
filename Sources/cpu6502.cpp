@@ -840,10 +840,10 @@ void CPU6502::IRQ()
 	push_stack((program_counter << 8) & 0x00FF);
 	push_stack(program_counter & 0x00FF);
 
-	push_stack(status);
-
 	// Disabling further interrupts to prevent nested interrupts
 	set_flag(flag_i, true);
+
+	push_stack(status);
 
 	// Reading a new program counter
 	// from 0xFFFF (high byte) and 0xFFFE (low byte)
@@ -864,10 +864,10 @@ void CPU6502::NMI()
 	push_stack((program_counter << 8) & 0x00FF);
 	push_stack(program_counter & 0x00FF);
 
-	push_stack(status);
-
 	// Still disabling further interrupts to prevent nested interrupts
 	set_flag(flag_i, true);
+
+	push_stack(status);
 
 	// Reading a new program counter
 	// from 0xFFFB (high byte) and 0xFFFA (low byte)
