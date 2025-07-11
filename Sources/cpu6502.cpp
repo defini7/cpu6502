@@ -848,6 +848,8 @@ void CPU6502::IRQ()
 	// Reading a new program counter
 	// from 0xFFFF (high byte) and 0xFFFE (low byte)
 	program_counter = ((uint16_t)read(0xFFFF) << 8) | (uint16_t)read(0xFFFE);
+
+	cycles = 7;
 }
 
 /* Non-Maskable Interrupt
@@ -870,6 +872,8 @@ void CPU6502::NMI()
 	// Reading a new program counter
 	// from 0xFFFB (high byte) and 0xFFFA (low byte)
 	program_counter = ((uint16_t)read(0xFFFB) << 8) | (uint16_t)read(0xFFFA);
+
+	cycles = 8;
 }
 
 /* JuMP
@@ -1093,15 +1097,32 @@ bool CPU6502::ROR()
 	return false;
 }
 
+/* ReTurn from Interrupt
+| Takes the top value from the stack and treats it as the status register value,
+| takes the next item after the top one and treats it as the program counter
+*/
 bool CPU6502::RTI()
 {
-	// TODO
+	status = pop_stack();
+
+	uint16_t low = pop_stack();
+	uint16_t high = pop_stack();
+
+	program_counter = (high << 8) | low;
+
 	return false;
 }
 
+/* ReTurn from Subroutine
+| Simply jumps back to the program counter on the top of the stack
+*/
 bool CPU6502::RTS()
 {
-	// TODO
+	uint16_t low = pop_stack();
+	uint16_t high = pop_stack();
+
+	program_counter = ((high << 8) | low) + 1;
+
 	return false;
 }
 
@@ -1300,4 +1321,3 @@ bool CPU6502::INY()
 
 	return false;
 }
-
